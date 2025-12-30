@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Support - 교사 지원 도구 모음</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <h1 class="logo">Teacher Support</h1>
+            <p class="subtitle">교사를 위한 스마트 도구 모음</p>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <!-- 자체 호스팅 앱 섹션 -->
+            <section class="section">
+                <h2 class="section-title">
+                    <span class="icon">🛠️</span>
+                    자체 도구
+                </h2>
+                <div class="card-grid">
+                    <!-- Exam Blueprint -->
+                    <a href="/blueprint" class="card card-internal">
+                        <div class="card-icon">📋</div>
+                        <div class="card-content">
+                            <h3>시험 블루프린트</h3>
+                            <p>난이도별 배점 자동 설계 도구</p>
+                        </div>
+                        <div class="card-badge">NEW</div>
+                    </a>
+
+                    <!-- 12345 Counter -->
+                    <a href="/counter" class="card card-internal">
+                        <div class="card-icon">💯</div>
+                        <div class="card-content">
+                            <h3>①②③④⑤ 카운터</h3>
+                            <p>정답 분포 분석 도구</p>
+                        </div>
+                        <div class="card-badge">NEW</div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- 성적/평가 도구 섹션 -->
+            <section class="section">
+                <h2 class="section-title">
+                    <span class="icon">📊</span>
+                    성적 · 평가
+                </h2>
+                <div class="card-grid">
+                    <!-- 기말고사 계산기 -->
+                    <a href="https://finalscalcu.web.app" target="_blank" class="card card-external">
+                        <div class="card-icon">🧮</div>
+                        <div class="card-content">
+                            <h3>기말고사 계산기</h3>
+                            <p>성적 계산 및 예측</p>
+                        </div>
+                        <div class="card-badge patent">특허</div>
+                    </a>
+
+                    <!-- 생기부 금칙어 검사기 -->
+                    <a href="https://port-0-prohibited-word-checker-mjfg3o9ec1e04ea8.sel3.cloudtype.app/" target="_blank" class="card card-external">
+                        <div class="card-icon">🔍</div>
+                        <div class="card-content">
+                            <h3>생기부 금칙어 검사기</h3>
+                            <p>생활기록부 금지어 자동 검출</p>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- 학습 도구 섹션 -->
+            <section class="section">
+                <h2 class="section-title">
+                    <span class="icon">📚</span>
+                    학습 · 관리
+                </h2>
+                <div class="card-grid">
+                    <!-- Solveit -->
+                    <a href="http://solve-it.kro.kr/" target="_blank" class="card card-external card-featured">
+                        <div class="card-icon">🎯</div>
+                        <div class="card-content">
+                            <h3>Solveit</h3>
+                            <p>스터디 매니징 시스템</p>
+                        </div>
+                        <div class="card-badge core">CORE</div>
+                    </a>
+
+                    <!-- 기출문제 입력 DB -->
+                    <a href="https://hwanghj09.github.io/mapro/" target="_blank" class="card card-external">
+                        <div class="card-icon">📝</div>
+                        <div class="card-content">
+                            <h3>기출문제 입력 DB</h3>
+                            <p>기출문제 데이터베이스</p>
+                        </div>
+                    </a>
+
+                    <!-- 찾동 -->
+                    <a href="https://pangyo-lufyc.web.app/" target="_blank" class="card card-external">
+                        <div class="card-icon">🔎</div>
+                        <div class="card-content">
+                            <h3>찾동</h3>
+                            <p>동아리 정보 검색</p>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- 학생 지원 섹션 -->
+            <section class="section">
+                <h2 class="section-title">
+                    <span class="icon">🎓</span>
+                    학생 지원
+                </h2>
+                <div class="card-grid">
+                    <!-- 리틀작가 -->
+                    <a href="https://littlechildwriter.web.app/" target="_blank" class="card card-external">
+                        <div class="card-icon">✍️</div>
+                        <div class="card-content">
+                            <h3>리틀작가</h3>
+                            <p>글쓰기 지원 도구</p>
+                        </div>
+                    </a>
+
+                    <!-- 마인즈 -->
+                    <a href="https://pangyomga.web.app/" target="_blank" class="card card-external">
+                        <div class="card-icon">🧠</div>
+                        <div class="card-content">
+                            <h3>마인즈</h3>
+                            <p>심리검사 자가진단</p>
+                        </div>
+                    </a>
+
+                    <!-- 판교고 Q&A -->
+                    <a href="https://pghs-qna.web.app/" target="_blank" class="card card-external">
+                        <div class="card-icon">💬</div>
+                        <div class="card-content">
+                            <h3>판교고 Q&A</h3>
+                            <p>학교 관련 질문답변</p>
+                        </div>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <!-- 푸터 -->
+        <footer class="footer">
+            <p>&copy; 2024 Teacher Support. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
