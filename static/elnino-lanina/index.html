@@ -1,1 +1,830 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>엘니뇨/라니냐 & 밀란코비치 주기 학습 도구</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>🌊 기후 변화 학습 도구</h1>
+        <nav>
+            <button class="nav-btn active" data-section="elnino">엘니뇨 / 라니냐</button>
+            <button class="nav-btn" data-section="milankovitch">밀란코비치 주기</button>
+            <button class="nav-btn" data-section="milankovitch-extreme">밀란코비치 (과장)</button>
+            <button class="nav-btn" data-section="quiz">OX 퀴즈</button>
+        </nav>
+    </header>
 
+    <main>
+        <!-- 엘니뇨/라니냐 섹션 -->
+        <section id="elnino-section" class="section active">
+            <div class="controls">
+                <h2>현상 선택</h2>
+                <div class="toggle-container">
+                    <button class="toggle-btn active" data-mode="elnino">엘니뇨</button>
+                    <button class="toggle-btn" data-mode="normal">평상시</button>
+                    <button class="toggle-btn" data-mode="lanina">라니냐</button>
+                </div>
+            </div>
+
+            <div class="split-layout">
+            <div class="diagram-container">
+                <svg id="ocean-diagram" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid meet">
+                    <!-- 배경 - 하늘 -->
+                    <defs>
+                        <linearGradient id="skyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#87CEEB"/>
+                            <stop offset="100%" style="stop-color:#E0F4FF"/>
+                        </linearGradient>
+                        <linearGradient id="warmWater" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#FF6B6B"/>
+                            <stop offset="100%" style="stop-color:#FF8E53"/>
+                        </linearGradient>
+                        <linearGradient id="coldWater" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4ECDC4"/>
+                            <stop offset="100%" style="stop-color:#2C7DA0"/>
+                        </linearGradient>
+                        <linearGradient id="thermocline" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#2C7DA0"/>
+                            <stop offset="100%" style="stop-color:#1A4B6E"/>
+                        </linearGradient>
+                        <!-- 구름 필터 -->
+                        <filter id="cloudShadow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#00000033"/>
+                        </filter>
+                    </defs>
+
+                    <!-- 하늘 배경 -->
+                    <rect x="0" y="0" width="900" height="200" fill="url(#skyGradient)"/>
+
+                    <!-- 지역 라벨 -->
+                    <text x="150" y="30" class="region-label">서태평양</text>
+                    <text x="750" y="30" class="region-label">동태평양</text>
+
+                    <!-- 기압 표시 -->
+                    <g id="pressure-west" class="pressure-indicator">
+                        <text x="150" y="55" class="pressure-text" id="pressure-west-text">저기압</text>
+                    </g>
+                    <g id="pressure-east" class="pressure-indicator">
+                        <text x="750" y="55" class="pressure-text" id="pressure-east-text">고기압</text>
+                    </g>
+
+                    <!-- 구름과 비 - 서태평양 -->
+                    <g id="cloud-west" class="cloud-group" filter="url(#cloudShadow)">
+                        <ellipse cx="120" cy="100" rx="50" ry="30" fill="white"/>
+                        <ellipse cx="160" cy="90" rx="45" ry="35" fill="white"/>
+                        <ellipse cx="200" cy="100" rx="50" ry="30" fill="white"/>
+                        <ellipse cx="160" cy="110" rx="55" ry="25" fill="white"/>
+                    </g>
+                    <g id="rain-west" class="rain-group">
+                        <!-- 비 애니메이션은 JavaScript로 제어 -->
+                    </g>
+
+                    <!-- 구름과 비 - 동태평양 -->
+                    <g id="cloud-east" class="cloud-group" filter="url(#cloudShadow)" opacity="0.3">
+                        <ellipse cx="720" cy="100" rx="40" ry="25" fill="white"/>
+                        <ellipse cx="750" cy="95" rx="35" ry="28" fill="white"/>
+                        <ellipse cx="780" cy="100" rx="40" ry="25" fill="white"/>
+                    </g>
+                    <g id="rain-east" class="rain-group">
+                    </g>
+
+                    <!-- 대기 순환 화살표 -->
+                    <g id="atmospheric-circulation">
+                        <path id="circulation-arrow" d="M 200 130 Q 450 50 700 130"
+                              fill="none" stroke="#5D7B93" stroke-width="3"
+                              marker-end="url(#arrowhead)"/>
+                        <path id="circulation-arrow-down-east" d="M 700 130 L 700 180"
+                              fill="none" stroke="#5D7B93" stroke-width="3"
+                              marker-end="url(#arrowhead)"/>
+                        <path id="circulation-arrow-down-west" d="M 200 180 L 200 130"
+                              fill="none" stroke="#5D7B93" stroke-width="3"
+                              marker-end="url(#arrowhead)"/>
+                    </g>
+
+                    <!-- 화살표 마커 정의 -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                                refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#5D7B93"/>
+                        </marker>
+                        <marker id="arrowhead-white" markerWidth="10" markerHeight="7"
+                                refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="white"/>
+                        </marker>
+                        <marker id="arrowhead-blue" markerWidth="10" markerHeight="7"
+                                refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#2C7DA0"/>
+                        </marker>
+                    </defs>
+
+                    <!-- 해수면 -->
+                    <line x1="0" y1="200" x2="900" y2="200" stroke="#1A4B6E" stroke-width="2"/>
+
+                    <!-- 온난 수역 (서태평양) -->
+                    <path id="warm-layer-west" d="M 0 200 L 0 320 Q 225 320 450 280 L 450 200 Z"
+                          fill="url(#warmWater)" opacity="0.9"/>
+
+                    <!-- 온난 수역 (동태평양) -->
+                    <path id="warm-layer-east" d="M 450 200 L 450 280 Q 675 240 900 230 L 900 200 Z"
+                          fill="url(#warmWater)" opacity="0.9"/>
+
+                    <!-- 냉수역 / 수온약층 -->
+                    <path id="cold-layer" d="M 0 320 Q 225 320 450 280 Q 675 240 900 230 L 900 400 L 0 400 Z"
+                          fill="url(#coldWater)" opacity="0.9"/>
+
+                    <!-- 심해 -->
+                    <rect x="0" y="400" width="900" height="100" fill="url(#thermocline)"/>
+
+                    <!-- 수온약층 라벨 -->
+                    <text x="100" y="350" class="layer-label" fill="white">수온약층</text>
+                    <text x="780" y="260" class="layer-label" fill="white" id="thermocline-east-label">수온약층</text>
+
+                    <!-- 온수/냉수 라벨 -->
+                    <text x="150" y="260" class="temp-label" fill="white">온수</text>
+                    <text x="750" y="220" class="temp-label" fill="white" id="cold-label-east">냉수</text>
+
+                    <!-- 무역풍 화살표 -->
+                    <g id="trade-winds">
+                        <line id="wind-arrow-1" x1="700" y1="185" x2="500" y2="185"
+                              stroke="white" stroke-width="4" marker-end="url(#arrowhead-white)"/>
+                        <line id="wind-arrow-2" x1="500" y1="185" x2="300" y2="185"
+                              stroke="white" stroke-width="4" marker-end="url(#arrowhead-white)"/>
+                        <text x="450" y="175" class="wind-label" fill="white">무역풍 (동풍)</text>
+                    </g>
+
+                    <!-- 용승 화살표 -->
+                    <g id="upwelling">
+                        <line id="upwelling-arrow" x1="800" y1="380" x2="800" y2="280"
+                              stroke="#2C7DA0" stroke-width="5" marker-end="url(#arrowhead-blue)"/>
+                        <text x="820" y="330" class="upwelling-label" fill="#1A4B6E">용승</text>
+                    </g>
+
+                    <!-- 해류 화살표 -->
+                    <g id="ocean-current">
+                        <path id="current-arrow" d="M 750 210 Q 450 210 150 210"
+                              fill="none" stroke="#FFD93D" stroke-width="4" stroke-dasharray="10,5"
+                              marker-end="url(#arrowhead-yellow)"/>
+                    </g>
+                    <defs>
+                        <marker id="arrowhead-yellow" markerWidth="10" markerHeight="7"
+                                refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#FFD93D"/>
+                        </marker>
+                    </defs>
+
+                    <!-- 대륙 (간단한 표현) -->
+                    <polygon points="0,200 30,180 50,190 30,200" fill="#8B7355"/>
+                    <polygon points="870,180 900,200 900,160 880,170" fill="#8B7355"/>
+
+                    <!-- 범례 -->
+                    <g id="legend" transform="translate(20, 420)">
+                        <rect x="0" y="0" width="200" height="70" fill="white" opacity="0.9" rx="5"/>
+                        <rect x="10" y="10" width="20" height="15" fill="url(#warmWater)"/>
+                        <text x="35" y="22" class="legend-text">온난 수역 (온수)</text>
+                        <rect x="10" y="35" width="20" height="15" fill="url(#coldWater)"/>
+                        <text x="35" y="47" class="legend-text">냉수역</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="info-panel">
+                <h3 id="phenomenon-title">평상시</h3>
+                <div id="phenomenon-description">
+                    <p>위의 버튼을 클릭하여 엘니뇨, 라니냐, 평상시 상태를 비교해보세요.</p>
+                </div>
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>구분</th>
+                                <th>서태평양</th>
+                                <th>동태평양</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparison-tbody">
+                            <tr>
+                                <td>해수면 온도</td>
+                                <td id="sst-west">-</td>
+                                <td id="sst-east">-</td>
+                            </tr>
+                            <tr>
+                                <td>기압</td>
+                                <td id="pressure-west-cell">-</td>
+                                <td id="pressure-east-cell">-</td>
+                            </tr>
+                            <tr>
+                                <td>강수량</td>
+                                <td id="rain-west-cell">-</td>
+                                <td id="rain-east-cell">-</td>
+                            </tr>
+                            <tr>
+                                <td>온난 수역 두께</td>
+                                <td id="warm-west-cell">-</td>
+                                <td id="warm-east-cell">-</td>
+                            </tr>
+                            <tr>
+                                <td>수온약층 깊이</td>
+                                <td id="thermo-west-cell">-</td>
+                                <td id="thermo-east-cell">-</td>
+                            </tr>
+                            <tr>
+                                <td>용승</td>
+                                <td>-</td>
+                                <td id="upwelling-cell">-</td>
+                            </tr>
+                            <tr>
+                                <td>무역풍</td>
+                                <td colspan="2" id="wind-cell">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </section>
+
+        <!-- 밀란코비치 주기 섹션 -->
+        <section id="milankovitch-section" class="section">
+            <div class="milankovitch-controls">
+                <div class="control-group">
+                    <label>세차운동 (주기: 약 26,000년)</label>
+                    <input type="range" id="precession-slider" min="0" max="26000" value="0" step="500">
+                    <span id="precession-value">현재 (서기 2000년)</span>
+                </div>
+                <div class="control-group">
+                    <label>자전축 기울기 (주기: 약 41,000년)</label>
+                    <input type="range" id="obliquity-slider" min="22.1" max="24.5" value="23.5" step="0.1">
+                    <span id="obliquity-value">23.5° (현재)</span>
+                </div>
+                <div class="control-group">
+                    <label>이심률 (주기: 약 100,000년)</label>
+                    <input type="range" id="eccentricity-slider" min="0" max="0.06" value="0.017" step="0.001">
+                    <span id="eccentricity-value">0.017 (현재)</span>
+                </div>
+            </div>
+
+            <div class="split-layout">
+                <!-- 왼쪽: 3D 세차운동 시뮬레이션 -->
+                <div class="precession-3d-container">
+                    <div class="precession-container">
+                        <div id="precession-ui">
+                            <div class="precession-info-text">
+                                <p>마우스 드래그로 시점 이동 | 빨간 점 = 북극</p>
+                            </div>
+                        </div>
+                        <div id="precession-canvas"></div>
+                    </div>
+                </div>
+
+                <!-- 오른쪽: 정보 패널 -->
+                <div class="milankovitch-info">
+                    <div class="status-box">
+                        <p id="info-hemisphere">북반구: 여름 | 남반구: 겨울</p>
+                        <p id="info-distance">거리: 원일점 (최대)</p>
+                        <p id="info-tilt">자전축 기울기: 23.5°</p>
+                        <p id="info-eccentricity">이심률: 0.017</p>
+                    </div>
+                    <div class="temp-box">
+                        <p class="temp-summer" id="temp-summer">북반구 여름: 기준</p>
+                        <p class="temp-winter" id="temp-winter">북반구 겨울: 기준</p>
+                        <p class="temp-range" id="temp-range">연교차: 기준</p>
+                        <p id="temp-south">남반구: 반대 효과</p>
+                    </div>
+                    <div class="cycle-explanation">
+                        <div class="cycle-item" id="precession-info">
+                            <h4>세차운동 (~26,000년)</h4>
+                            <p>자전축이 팽이처럼 회전. 근일점/원일점 시 계절 변화</p>
+                        </div>
+                        <div class="cycle-item" id="obliquity-info">
+                            <h4>자전축 기울기 (~41,000년)</h4>
+                            <p>22.1°~24.5° 변화. 기울기 증가시 계절차 증가</p>
+                        </div>
+                        <div class="cycle-item" id="eccentricity-info">
+                            <h4>이심률 (~100,000년)</h4>
+                            <p>0~0.06 변화. 이심률 증가시 근일점/원일점 거리차 증가</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 밀란코비치 주기 (과장된 버전) 섹션 -->
+        <section id="milankovitch-extreme-section" class="section">
+            <div class="extreme-warning">
+                ⚠️ 교육용 과장된 버전: 실제 밀란코비치 주기보다 훨씬 극단적인 값으로 설정되어 있습니다
+            </div>
+            <div class="milankovitch-controls">
+                <div class="control-group">
+                    <label>세차운동 (주기: 약 26,000년)</label>
+                    <input type="range" id="precession-slider-ex" min="0" max="26000" value="0" step="500">
+                    <span id="precession-value-ex">현재 (서기 2000년)</span>
+                </div>
+                <div class="control-group extreme-control">
+                    <label>자전축 기울기 (과장: 0°~90°)</label>
+                    <input type="range" id="obliquity-slider-ex" min="0" max="90" value="23.5" step="1">
+                    <span id="obliquity-value-ex">23.5° (현재)</span>
+                </div>
+                <div class="control-group extreme-control">
+                    <label>이심률 (과장: 0~0.9)</label>
+                    <input type="range" id="eccentricity-slider-ex" min="0" max="0.9" value="0.017" step="0.01">
+                    <span id="eccentricity-value-ex">0.017 (현재)</span>
+                </div>
+            </div>
+
+            <div class="split-layout">
+                <!-- 왼쪽: 3D 세차운동 시뮬레이션 (과장) -->
+                <div class="precession-3d-container">
+                    <div class="precession-container" id="precession-container-ex">
+                        <div id="precession-ui-ex">
+                            <div class="precession-info-text">
+                                <p>마우스 드래그로 시점 이동 | 빨간 점 = 북극</p>
+                            </div>
+                        </div>
+                        <div id="precession-canvas-ex"></div>
+                    </div>
+                </div>
+
+                <!-- 오른쪽: 정보 패널 -->
+                <div class="milankovitch-info">
+                    <div class="status-box">
+                        <p id="info-hemisphere-ex">북반구: 여름 | 남반구: 겨울</p>
+                        <p id="info-distance-ex">거리: 원일점 (최대)</p>
+                        <p id="info-tilt-ex">자전축 기울기: 23.5°</p>
+                        <p id="info-eccentricity-ex">이심률: 0.017</p>
+                    </div>
+                    <div class="temp-box">
+                        <p class="temp-summer" id="temp-summer-ex">북반구 여름: 기준</p>
+                        <p class="temp-winter" id="temp-winter-ex">북반구 겨울: 기준</p>
+                        <p class="temp-range" id="temp-range-ex">연교차: 기준</p>
+                        <p id="temp-south-ex">남반구: 반대 효과</p>
+                    </div>
+                    <div class="cycle-explanation">
+                        <div class="cycle-item">
+                            <h4>자전축 기울기 극단값</h4>
+                            <p>0° = 계절 없음 (적도와 극지방 온도차만 존재)<br>
+                               90° = 극단적 계절 (한쪽 반구가 완전히 태양을 향함)</p>
+                        </div>
+                        <div class="cycle-item">
+                            <h4>이심률 극단값</h4>
+                            <p>0 = 완전한 원 (근일점/원일점 거리 동일)<br>
+                               0.9 = 극단적 타원 (근일점이 태양에 매우 가까움)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 퀴즈 섹션 -->
+        <section id="quiz-section" class="section">
+            <div class="quiz-container">
+                <!-- 퀴즈 설정 화면 -->
+                <div id="quiz-setup" class="quiz-setup">
+                    <h2>OX 퀴즈</h2>
+                    <div class="setup-form">
+                        <div class="setup-group">
+                            <label>카테고리</label>
+                            <select id="quiz-category">
+                                <option value="all">전체</option>
+                                <option value="elnino">엘니뇨/라니냐</option>
+                                <option value="milankovitch">밀란코비치 주기</option>
+                            </select>
+                        </div>
+                        <div class="setup-group">
+                            <label>문항 수</label>
+                            <div class="question-count-options">
+                                <button class="count-btn" data-count="5">5문제</button>
+                                <button class="count-btn active" data-count="10">10문제</button>
+                                <button class="count-btn" data-count="15">15문제</button>
+                                <button class="count-btn" data-count="20">20문제</button>
+                            </div>
+                        </div>
+                        <div class="setup-group">
+                            <label>시간 제한</label>
+                            <div class="time-limit-options">
+                                <button class="time-btn active" data-time="0">없음</button>
+                                <button class="time-btn" data-time="5">5초</button>
+                                <button class="time-btn" data-time="10">10초</button>
+                            </div>
+                        </div>
+                        <button id="start-quiz-btn" class="btn start-btn">퀴즈 시작</button>
+                    </div>
+                </div>
+
+                <!-- 퀴즈 진행 화면 -->
+                <div id="quiz-play" class="quiz-play" style="display: none;">
+                    <div class="quiz-header">
+                        <h2>OX 퀴즈</h2>
+                        <div class="quiz-progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="quiz-progress">
+                            <span id="quiz-score">점수: 0 / 0</span>
+                            <span id="quiz-streak">연속 정답: 0</span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-card">
+                        <div class="question-header">
+                            <div class="question-number" id="question-number">문제 1</div>
+                            <div class="timer-display" id="timer-display" style="display: none;">
+                                <div class="timer-bar" id="timer-bar"></div>
+                                <span class="timer-text" id="timer-text">10</span>
+                            </div>
+                        </div>
+                        <div class="question-text" id="question-text">
+                            퀴즈를 시작하려면 "새 문제" 버튼을 클릭하세요.
+                        </div>
+                        <div class="answer-buttons">
+                            <button class="answer-btn" id="btn-o" disabled>O</button>
+                            <button class="answer-btn" id="btn-x" disabled>X</button>
+                        </div>
+                        <div class="feedback" id="feedback"></div>
+                        <div class="explanation" id="explanation"></div>
+                    </div>
+
+                    <button id="next-quiz-btn" class="btn next-btn" style="display: none;">다음 문제</button>
+                </div>
+
+                <!-- 결과 화면 -->
+                <div id="quiz-result" class="quiz-result" style="display: none;">
+                    <h2>퀴즈 결과</h2>
+                    <div class="result-score-container">
+                        <div class="result-score" id="result-score">0</div>
+                        <div class="result-score-label">점</div>
+                    </div>
+                    <div class="result-details">
+                        <div class="result-item">
+                            <span class="result-label">정답</span>
+                            <span class="result-value" id="result-correct">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">오답</span>
+                            <span class="result-value" id="result-incorrect">0</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">총 문항</span>
+                            <span class="result-value" id="result-total">0</span>
+                        </div>
+                    </div>
+                    <div class="result-message" id="result-message"></div>
+                    <div class="result-buttons">
+                        <button id="retry-quiz-btn" class="btn">다시 풀기</button>
+                        <button id="new-quiz-setup-btn" class="btn">새 퀴즈</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>🌍 기후 변화 학습 도구 - 엘니뇨/라니냐 & 밀란코비치 주기</p>
+    </footer>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script src="data.js"></script>
+    <script src="elnino.js"></script>
+    <script src="milankovitch.js"></script>
+    <script src="milankovitch-extreme.js"></script>
+    <script src="quiz.js"></script>
+    <script src="app.js"></script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let precessionScene, precessionCamera, precessionRenderer, precessionControls;
+        let earthSystems = [];
+        let currentPrecessionYear = 0;
+        let currentObliquity = 23.5;
+        let currentEccentricity = 0.017;
+        let precessionInitialized = false;
+        let orbitCurve;
+        let orbitLine;
+
+        window.initPrecession = function() {
+            if (precessionInitialized) return;
+
+            const container = document.getElementById('precession-canvas');
+            if (!container) return;
+
+            // Scene 설정
+            precessionScene = new THREE.Scene();
+
+            // Camera 설정
+            precessionCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 5000);
+            precessionCamera.position.set(0, 180, 300);
+
+            // Renderer 설정
+            precessionRenderer = new THREE.WebGLRenderer({ antialias: true });
+            precessionRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(precessionRenderer.domElement);
+
+            // OrbitControls 설정
+            precessionControls = new OrbitControls(precessionCamera, precessionRenderer.domElement);
+            precessionControls.enableDamping = true;
+            precessionControls.screenSpacePanning = true;
+
+            // 배경 별빛
+            const starCoords = [];
+            for (let i = 0; i < 6000; i++) {
+                starCoords.push(
+                    THREE.MathUtils.randFloatSpread(2000),
+                    THREE.MathUtils.randFloatSpread(2000),
+                    THREE.MathUtils.randFloatSpread(2000)
+                );
+            }
+            const starGeo = new THREE.BufferGeometry();
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+            precessionScene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.8 })));
+
+            // 태양
+            const sun = new THREE.Mesh(
+                new THREE.SphereGeometry(15, 32, 32),
+                new THREE.MeshBasicMaterial({ color: 0xffcc00 })
+            );
+            precessionScene.add(sun);
+
+            const sunLight = new THREE.PointLight(0xffffff, 15000, 1500);
+            precessionScene.add(sunLight);
+            precessionScene.add(new THREE.AmbientLight(0x222222));
+
+            // 공전 궤도 (동적으로 변경됨)
+            orbitLine = new THREE.Line(
+                new THREE.BufferGeometry(),
+                new THREE.LineBasicMaterial({ color: 0x444444 })
+            );
+            precessionScene.add(orbitLine);
+
+            // 지구 시스템
+            const TILT = 23.5 * (Math.PI / 180);
+            const orbitPositions = [0.5, 0.75, 0, 0.25]; // 0.5가 왼쪽(근일점)
+
+            orbitPositions.forEach(t => {
+                const root = new THREE.Group();
+                const pivot = new THREE.Group();
+
+                const earth = new THREE.Mesh(
+                    new THREE.SphereGeometry(13, 64, 64),
+                    new THREE.MeshStandardMaterial({ color: 0x1188ff, roughness: 0.8 })
+                );
+
+                const axis = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.3, 0.3, 50, 8),
+                    new THREE.MeshBasicMaterial({ color: 0xffffff })
+                );
+                const pole = new THREE.Mesh(
+                    new THREE.SphereGeometry(2, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+                );
+                pole.position.y = 25;
+                axis.add(pole);
+
+                pivot.add(earth);
+                pivot.add(axis);
+                root.add(pivot);
+
+                precessionScene.add(root);
+                earthSystems.push({ root, pivot, earth, t, baseTilt: TILT });
+            });
+
+            // 애니메이션 루프
+            function animate() {
+                requestAnimationFrame(animate);
+                earthSystems.forEach(s => s.earth.rotation.y += 0.01);
+                precessionControls.update();
+                precessionRenderer.render(precessionScene, precessionCamera);
+            }
+
+            updateOrbit();
+            updatePrecession3D();
+            animate();
+
+            // 리사이즈 핸들러
+            const resizeHandler = () => {
+                if (!container || !precessionCamera || !precessionRenderer) return;
+                precessionCamera.aspect = container.clientWidth / container.clientHeight;
+                precessionCamera.updateProjectionMatrix();
+                precessionRenderer.setSize(container.clientWidth, container.clientHeight);
+            };
+            window.addEventListener('resize', resizeHandler);
+
+            precessionInitialized = true;
+        };
+
+        function updateOrbit() {
+            // 이심률에 따라 궤도 형태 변경
+            const e = currentEccentricity;
+            const a = 120; // 장반경
+            const b = a * Math.sqrt(1 - e * e); // 단반경
+            const c = a * e; // 초점 거리 (태양이 초점에 위치)
+
+            orbitCurve = new THREE.EllipseCurve(c, 0, a, b, 0, 2 * Math.PI, false);
+            const points = orbitCurve.getPoints(100).map(p => new THREE.Vector3(p.x, 0, p.y));
+            orbitLine.geometry.dispose();
+            orbitLine.geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+            // 지구 위치 업데이트
+            earthSystems.forEach(sys => {
+                const pos = orbitCurve.getPoint(sys.t);
+                sys.root.position.set(pos.x, 0, pos.y);
+            });
+        }
+
+        function updatePrecession3D() {
+            // 세차운동 각도 (26000년 주기)
+            const precessionAngle = (currentPrecessionYear / 26000) * Math.PI * 2;
+            // 현재 기울기를 라디안으로
+            const tiltRad = currentObliquity * (Math.PI / 180);
+
+            earthSystems.forEach((sys) => {
+                sys.pivot.rotation.set(0, 0, 0);
+                sys.pivot.rotation.y = -precessionAngle;
+                sys.pivot.rotation.z = tiltRad;
+            });
+        }
+
+        // 외부에서 호출할 수 있는 함수들
+        window.updatePrecessionFromSlider = function(yearValue, obliquityValue, eccentricityValue) {
+            currentPrecessionYear = yearValue;
+            currentObliquity = obliquityValue;
+            currentEccentricity = eccentricityValue;
+            if (precessionInitialized) {
+                updateOrbit();
+                updatePrecession3D();
+            }
+        };
+
+        window.resetPrecession3D = function() {
+            if (precessionCamera && precessionControls) {
+                precessionCamera.position.set(0, 180, 300);
+                precessionControls.target.set(0, 0, 0);
+            }
+        };
+
+        // ==================== 과장된 버전 ====================
+        let exScene, exCamera, exRenderer, exControls;
+        let exEarthSystems = [];
+        let exOrbitLine;
+        let exCurrentYear = 0;
+        let exCurrentObliquity = 23.5;
+        let exCurrentEccentricity = 0.017;
+        let exInitialized = false;
+
+        window.initPrecessionExtreme = function() {
+            if (exInitialized) return;
+
+            const container = document.getElementById('precession-canvas-ex');
+            if (!container) return;
+
+            // Scene
+            exScene = new THREE.Scene();
+
+            // Camera
+            exCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 5000);
+            exCamera.position.set(0, 180, 300);
+
+            // Renderer
+            exRenderer = new THREE.WebGLRenderer({ antialias: true });
+            exRenderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(exRenderer.domElement);
+
+            // Controls
+            exControls = new OrbitControls(exCamera, exRenderer.domElement);
+            exControls.enableDamping = true;
+            exControls.screenSpacePanning = true;
+
+            // 별
+            const starCoords = [];
+            for (let i = 0; i < 6000; i++) {
+                starCoords.push(
+                    THREE.MathUtils.randFloatSpread(2000),
+                    THREE.MathUtils.randFloatSpread(2000),
+                    THREE.MathUtils.randFloatSpread(2000)
+                );
+            }
+            const starGeo = new THREE.BufferGeometry();
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+            exScene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.8 })));
+
+            // 태양
+            const sun = new THREE.Mesh(
+                new THREE.SphereGeometry(15, 32, 32),
+                new THREE.MeshBasicMaterial({ color: 0xffcc00 })
+            );
+            exScene.add(sun);
+
+            const sunLight = new THREE.PointLight(0xffffff, 15000, 1500);
+            exScene.add(sunLight);
+            exScene.add(new THREE.AmbientLight(0x222222));
+
+            // 궤도 (동적으로 변경됨)
+            exOrbitLine = new THREE.Line(
+                new THREE.BufferGeometry(),
+                new THREE.LineBasicMaterial({ color: 0x444444 })
+            );
+            exScene.add(exOrbitLine);
+
+            // 지구 시스템 4개
+            const orbitPositions = [0.5, 0.75, 0, 0.25];
+            orbitPositions.forEach((t, idx) => {
+                const root = new THREE.Group();
+                const pivot = new THREE.Group();
+
+                const earth = new THREE.Mesh(
+                    new THREE.SphereGeometry(13, 64, 64),
+                    new THREE.MeshStandardMaterial({ color: 0x1188ff, roughness: 0.8 })
+                );
+
+                const axis = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.3, 0.3, 50, 8),
+                    new THREE.MeshBasicMaterial({ color: 0xffffff })
+                );
+                const pole = new THREE.Mesh(
+                    new THREE.SphereGeometry(2, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: 0xff0000 })
+                );
+                pole.position.y = 25;
+                axis.add(pole);
+
+                pivot.add(earth);
+                pivot.add(axis);
+                root.add(pivot);
+                exScene.add(root);
+
+                exEarthSystems.push({ root, pivot, earth, t });
+            });
+
+            // 애니메이션
+            function animate() {
+                requestAnimationFrame(animate);
+                exEarthSystems.forEach(s => s.earth.rotation.y += 0.01);
+                exControls.update();
+                exRenderer.render(exScene, exCamera);
+            }
+
+            updateExtremeOrbit();
+            updateExtremePrecession();
+            animate();
+
+            // 리사이즈
+            window.addEventListener('resize', () => {
+                if (!container || !exCamera || !exRenderer) return;
+                exCamera.aspect = container.clientWidth / container.clientHeight;
+                exCamera.updateProjectionMatrix();
+                exRenderer.setSize(container.clientWidth, container.clientHeight);
+            });
+
+            exInitialized = true;
+        };
+
+        function updateExtremeOrbit() {
+            // 이심률에 따라 궤도 형태 변경
+            const e = exCurrentEccentricity;
+            const a = 120; // 장반경
+            const b = a * Math.sqrt(1 - e * e); // 단반경
+            const c = a * e; // 초점 거리
+
+            const curve = new THREE.EllipseCurve(c, 0, a, b, 0, 2 * Math.PI, false);
+            const points = curve.getPoints(100).map(p => new THREE.Vector3(p.x, 0, p.y));
+            exOrbitLine.geometry.dispose();
+            exOrbitLine.geometry = new THREE.BufferGeometry().setFromPoints(points);
+
+            // 지구 위치 업데이트
+            exEarthSystems.forEach(sys => {
+                const pos = curve.getPoint(sys.t);
+                sys.root.position.set(pos.x, 0, pos.y);
+            });
+        }
+
+        function updateExtremePrecession() {
+            const precessionAngle = (exCurrentYear / 26000) * Math.PI * 2;
+            const tiltRad = exCurrentObliquity * (Math.PI / 180);
+
+            exEarthSystems.forEach(sys => {
+                sys.pivot.rotation.set(0, 0, 0);
+                sys.pivot.rotation.y = -precessionAngle;
+                sys.pivot.rotation.z = tiltRad;
+            });
+        }
+
+        window.updateExtremeFromSlider = function(yearValue, obliquityValue, eccentricityValue) {
+            exCurrentYear = yearValue;
+            exCurrentObliquity = obliquityValue;
+            exCurrentEccentricity = eccentricityValue;
+            if (exInitialized) {
+                updateExtremeOrbit();
+                updateExtremePrecession();
+            }
+        };
+    </script>
+</body>
+</html>

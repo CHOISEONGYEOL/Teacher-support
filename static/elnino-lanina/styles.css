@@ -1,0 +1,1093 @@
+/* 기본 스타일 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    color: #fff;
+}
+
+/* 헤더 */
+header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+    background: linear-gradient(90deg, #FF6B6B, #4ECDC4, #FFD93D);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.nav-btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.nav-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.nav-btn.active {
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+}
+
+/* 메인 */
+main {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+}
+
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+/* 2분할 레이아웃 */
+.split-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (max-width: 1200px) {
+    .split-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 컨트롤 */
+.controls {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.controls h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+    color: #4ECDC4;
+}
+
+.toggle-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.toggle-btn {
+    padding: 1rem 2rem;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.toggle-btn.active[data-mode="elnino"] {
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+    border-color: #FF6B6B;
+    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.5);
+}
+
+.toggle-btn.active[data-mode="lanina"] {
+    background: linear-gradient(135deg, #4ECDC4, #2C7DA0);
+    border-color: #4ECDC4;
+    box-shadow: 0 4px 20px rgba(78, 205, 196, 0.5);
+}
+
+.toggle-btn.active[data-mode="normal"] {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    border-color: #6c757d;
+    box-shadow: 0 4px 20px rgba(108, 117, 125, 0.5);
+}
+
+/* 다이어그램 컨테이너 */
+.diagram-container {
+    background: white;
+    border-radius: 15px;
+    padding: 0.5rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    height: fit-content;
+}
+
+#ocean-diagram {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* SVG 텍스트 스타일 */
+.region-label {
+    font-size: 18px;
+    font-weight: bold;
+    fill: #1A4B6E;
+    text-anchor: middle;
+}
+
+.pressure-text {
+    font-size: 14px;
+    fill: #5D7B93;
+    text-anchor: middle;
+}
+
+.layer-label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.temp-label {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.wind-label {
+    font-size: 14px;
+    text-anchor: middle;
+}
+
+.upwelling-label {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.legend-text {
+    font-size: 12px;
+    fill: #333;
+}
+
+/* 정보 패널 */
+.info-panel {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 1rem 1.5rem;
+    height: fit-content;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+.info-panel h3 {
+    color: #FFD93D;
+    margin-bottom: 0.8rem;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+#phenomenon-description {
+    text-align: center;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+/* 비교 테이블 */
+.comparison-table {
+    overflow-x: auto;
+}
+
+.comparison-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 0.6rem 0.8rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.9rem;
+}
+
+.comparison-table th {
+    background: rgba(255, 255, 255, 0.1);
+    color: #4ECDC4;
+    font-weight: bold;
+}
+
+.comparison-table td {
+    color: #fff;
+}
+
+.comparison-table tr:last-child td {
+    border-bottom: none;
+}
+
+.increase {
+    color: #FF6B6B !important;
+    font-weight: bold;
+}
+
+.decrease {
+    color: #4ECDC4 !important;
+    font-weight: bold;
+}
+
+.strong {
+    color: #FFD93D !important;
+    font-weight: bold;
+}
+
+.weak {
+    color: #9B9B9B !important;
+}
+
+/* 밀란코비치 컨트롤 */
+.milankovitch-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+@media (max-width: 900px) {
+    .milankovitch-controls {
+        grid-template-columns: 1fr;
+    }
+}
+
+.control-group {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.8rem;
+    border-radius: 10px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #FFD93D;
+    font-weight: bold;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.slider-container span {
+    font-size: 0.9rem;
+    color: #aaa;
+    white-space: nowrap;
+}
+
+.slider-container input[type="range"] {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.slider-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4ECDC4, #2C7DA0);
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(78, 205, 196, 0.5);
+}
+
+.value-display {
+    text-align: center;
+    margin-top: 0.5rem;
+    color: #4ECDC4;
+    font-weight: bold;
+}
+
+/* 밀란코비치 다이어그램 */
+.milankovitch-diagram {
+    background: #0a0a20;
+}
+
+#orbit-diagram {
+    width: 100%;
+    height: auto;
+}
+
+/* 밀란코비치 정보 */
+.milankovitch-info .status-box,
+.milankovitch-info .temp-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.milankovitch-info .status-box p,
+.milankovitch-info .temp-box p {
+    margin: 0.4rem 0;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.milankovitch-info .temp-summer {
+    color: #FF6B6B !important;
+}
+
+.milankovitch-info .temp-winter {
+    color: #4ECDC4 !important;
+}
+
+.milankovitch-info .temp-range {
+    color: #FFD93D !important;
+}
+
+.milankovitch-info .cycle-explanation {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.cycle-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    border-left: 3px solid #4ECDC4;
+}
+
+.cycle-item h4 {
+    color: #FFD93D;
+    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+}
+
+.cycle-item p {
+    color: #aaa;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* 세차운동 3D 섹션 */
+.precession-3d-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.precession-3d-container h3 {
+    color: #4ECDC4;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.precession-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    min-height: 350px;
+    background: #000;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.orbit-info-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#precession-canvas {
+    width: 100%;
+    height: 100%;
+}
+
+#precession-canvas canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+#precession-ui {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.precession-info-text {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 15px;
+    border-radius: 8px;
+}
+
+.precession-info-text p {
+    color: #aaa;
+    font-size: 12px;
+    margin: 3px 0;
+}
+
+/* 과장된 버전용 캔버스 */
+#precession-canvas-ex {
+    width: 100%;
+    height: 100%;
+}
+
+#precession-canvas-ex canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+#precession-ui-ex {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+/* 과장된 버전 경고 */
+.extreme-warning {
+    background: linear-gradient(135deg, #ff6b6b33, #ff8e5333);
+    border: 2px solid #ff6b6b;
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: #FFD93D;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+/* 과장된 컨트롤 하이라이트 */
+.extreme-control {
+    border: 2px solid #ff6b6b;
+    background: rgba(255, 107, 107, 0.1) !important;
+}
+
+.extreme-control label {
+    color: #FF6B6B !important;
+}
+
+/* 퀴즈 섹션 */
+.quiz-container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.quiz-header h2 {
+    color: #4ECDC4;
+}
+
+.quiz-controls {
+    display: flex;
+    gap: 1rem;
+}
+
+.quiz-controls select {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.quiz-controls select option {
+    background: #1a1a2e;
+    color: white;
+}
+
+.btn {
+    padding: 0.5rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4ECDC4, #2C7DA0);
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+}
+
+.quiz-progress {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.quiz-progress span {
+    color: #FFD93D;
+    font-weight: bold;
+}
+
+.quiz-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.question-number {
+    color: #4ECDC4;
+    font-size: 0.9rem;
+}
+
+/* 타이머 */
+.timer-display {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+}
+
+.timer-bar {
+    width: 80px;
+    height: 8px;
+    background: linear-gradient(90deg, #4ECDC4, #2C7DA0);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.timer-bar.warning {
+    background: linear-gradient(90deg, #FFD93D, #FF8E53);
+}
+
+.timer-bar.danger {
+    background: linear-gradient(90deg, #FF6B6B, #FF4444);
+    animation: pulse-timer 0.5s ease infinite;
+}
+
+@keyframes pulse-timer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.timer-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #FFD93D;
+    min-width: 25px;
+    text-align: center;
+}
+
+.question-text {
+    font-size: 1.3rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    min-height: 80px;
+}
+
+.answer-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.answer-btn {
+    padding: 1.5rem 3rem;
+    font-size: 1.5rem;
+    border: 3px solid transparent;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.answer-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+}
+
+.answer-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#btn-o:hover:not(:disabled) {
+    background: rgba(78, 205, 196, 0.3);
+    border-color: #4ECDC4;
+}
+
+#btn-x:hover:not(:disabled) {
+    background: rgba(255, 107, 107, 0.3);
+    border-color: #FF6B6B;
+}
+
+.answer-btn.correct {
+    background: rgba(78, 205, 196, 0.5);
+    border-color: #4ECDC4;
+    animation: pulse 0.5s ease;
+}
+
+.answer-btn.incorrect {
+    background: rgba(255, 107, 107, 0.5);
+    border-color: #FF6B6B;
+    animation: shake 0.5s ease;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.feedback {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    min-height: 40px;
+}
+
+.feedback.correct {
+    color: #4ECDC4;
+}
+
+.feedback.incorrect {
+    color: #FF6B6B;
+}
+
+.feedback.timeout {
+    color: #FF8E53;
+}
+
+.explanation {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 10px;
+    color: #ccc;
+    line-height: 1.5;
+    min-height: 50px;
+    display: none;
+}
+
+.explanation.show {
+    display: block;
+}
+
+/* 퀴즈 기록 */
+.quiz-history {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 1.5rem;
+}
+
+.quiz-history h3 {
+    color: #FFD93D;
+    margin-bottom: 1rem;
+}
+
+#history-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.history-item {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.history-item.correct {
+    background: rgba(78, 205, 196, 0.2);
+    border-left: 3px solid #4ECDC4;
+}
+
+.history-item.incorrect {
+    background: rgba(255, 107, 107, 0.2);
+    border-left: 3px solid #FF6B6B;
+}
+
+/* 퀴즈 설정 화면 */
+.quiz-setup {
+    text-align: center;
+}
+
+.quiz-setup h2 {
+    color: #4ECDC4;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+.setup-form {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 2rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.setup-group {
+    margin-bottom: 1.5rem;
+}
+
+.setup-group label {
+    display: block;
+    color: #FFD93D;
+    margin-bottom: 0.8rem;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.setup-group select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.setup-group select option {
+    background: #1a1a2e;
+    color: white;
+}
+
+.question-count-options {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+}
+
+.count-btn {
+    padding: 0.8rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.count-btn:hover {
+    border-color: #4ECDC4;
+    background: rgba(78, 205, 196, 0.2);
+}
+
+.count-btn.active {
+    border-color: #4ECDC4;
+    background: rgba(78, 205, 196, 0.3);
+    color: #4ECDC4;
+    font-weight: bold;
+}
+
+/* 시간 제한 버튼 */
+.time-limit-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.8rem;
+}
+
+.time-btn {
+    padding: 0.8rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.time-btn:hover {
+    border-color: #FF8E53;
+    background: rgba(255, 142, 83, 0.2);
+}
+
+.time-btn.active {
+    border-color: #FF8E53;
+    background: rgba(255, 142, 83, 0.3);
+    color: #FF8E53;
+    font-weight: bold;
+}
+
+.start-btn {
+    margin-top: 1.5rem;
+    padding: 1rem 3rem;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+}
+
+.start-btn:hover {
+    box-shadow: 0 4px 20px rgba(255, 107, 107, 0.5);
+}
+
+/* 퀴즈 진행 화면 */
+.quiz-play .quiz-header {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.quiz-play .quiz-header h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.quiz-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4ECDC4, #2C7DA0);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.next-btn {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, #4ECDC4, #2C7DA0);
+}
+
+/* 결과 화면 */
+.quiz-result {
+    text-align: center;
+}
+
+.quiz-result h2 {
+    color: #4ECDC4;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+.result-score-container {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    margin-bottom: 2rem;
+}
+
+.result-score {
+    font-size: 6rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #FFD93D, #FF8E53);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+
+.result-score-label {
+    font-size: 2rem;
+    color: #FFD93D;
+    margin-left: 0.5rem;
+}
+
+.result-details {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.result-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    min-width: 100px;
+}
+
+.result-label {
+    display: block;
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+}
+
+.result-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #FFD93D;
+}
+
+.result-message {
+    font-size: 1.2rem;
+    color: #ccc;
+    margin-bottom: 2rem;
+}
+
+.result-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.result-buttons .btn {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+}
+
+#retry-quiz-btn {
+    background: linear-gradient(135deg, #4ECDC4, #2C7DA0);
+}
+
+#new-quiz-setup-btn {
+    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+}
+
+/* 푸터 */
+footer {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.4rem;
+    }
+
+    .nav-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    main {
+        padding: 1rem;
+    }
+
+    .toggle-btn {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .question-text {
+        font-size: 1.1rem;
+    }
+
+    .answer-btn {
+        padding: 1rem 2rem;
+        font-size: 1.2rem;
+    }
+
+    .quiz-header {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* 비 애니메이션 */
+.rain-drop {
+    animation: rainFall 1s linear infinite;
+}
+
+@keyframes rainFall {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(80px);
+        opacity: 0;
+    }
+}
+
+/* 구름 애니메이션 */
+.cloud-group {
+    transition: all 0.8s ease;
+}
+
+/* 용승 애니메이션 */
+#upwelling-arrow {
+    transition: all 0.8s ease;
+}
+
+/* 무역풍 애니메이션 */
+#trade-winds line {
+    transition: all 0.8s ease;
+}
+
+/* 해수층 애니메이션 */
+#warm-layer-west,
+#warm-layer-east,
+#cold-layer {
+    transition: all 0.8s ease;
+}
