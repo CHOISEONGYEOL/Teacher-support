@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물수지 평형 - 객관식 모드</title>
+    <script src="../theme.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f3460;
+            --text-primary: #fff;
+            --text-secondary: #aaa;
+            --text-muted: #888;
+            --card-bg: rgba(255,255,255,0.05);
+            --card-border: rgba(255,255,255,0.1);
+            --shadow-color: rgba(0,0,0,0.3);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #e8ecf1;
+            --bg-tertiary: #dce3eb;
+            --text-primary: #1a1a1a;
+            --text-secondary: #333333;
+            --text-muted: #555555;
+            --card-bg: rgba(255,255,255,0.9);
+            --card-border: rgba(0,0,0,0.15);
+            --shadow-color: rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-primary);
+        }
+
+        .score-display {
+            font-size: 1.2rem;
+            color: #3498db;
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title h1 {
+            font-size: 1.5rem;
+            color: #3498db;
+            margin-bottom: 5px;
+        }
+
+        .title p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .diagram-container {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* 대기 영역 */
+        .atmosphere {
+            width: 100%;
+            text-align: center;
+            padding: 15px;
+            background: rgba(155, 89, 182, 0.15);
+            border: 2px solid rgba(155, 89, 182, 0.5);
+            border-radius: 12px;
+        }
+
+        .atmosphere-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #9b59b6;
+            margin-bottom: 10px;
+        }
+
+        .storage-box {
+            display: inline-block;
+            background: rgba(155, 89, 182, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .storage-label {
+            font-size: 0.8rem;
+            color: #9b59b6;
+            margin-bottom: 3px;
+        }
+
+        .storage-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #9b59b6;
+        }
+
+        .storage-value.blank {
+            color: #e74c3c;
+        }
+
+        /* 화살표 영역 */
+        .arrows-section {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            padding: 5px 0;
+        }
+
+        .arrow-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .arrow-up {
+            font-size: 1.2rem;
+            color: #e74c3c;
+        }
+
+        .arrow-down {
+            font-size: 1.2rem;
+            color: #3498db;
+        }
+
+        .arrow-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* 지표면 영역 */
+        .surface-section {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            gap: 15px;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .region {
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            min-width: 180px;
+            flex: 1;
+            max-width: 250px;
+        }
+
+        .region.land {
+            background: rgba(139, 69, 19, 0.2);
+            border: 2px solid rgba(139, 69, 19, 0.5);
+        }
+
+        .region.ocean {
+            background: rgba(52, 152, 219, 0.2);
+            border: 2px solid rgba(52, 152, 219, 0.5);
+        }
+
+        .region-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .region.land .region-title {
+            color: #d4a574;
+        }
+
+        .region.ocean .region-title {
+            color: #3498db;
+        }
+
+        .variable-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+        }
+
+        .variable-label {
+            font-weight: bold;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .variable-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1abc9c;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .variable-value.blank {
+            color: #e74c3c;
+            font-size: 1.2rem;
+        }
+
+        /* 유출량 */
+        .runoff-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            background: rgba(26, 188, 156, 0.1);
+            border: 2px dashed rgba(26, 188, 156, 0.5);
+            border-radius: 12px;
+        }
+
+        .runoff-label {
+            color: #1abc9c;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-right: 8px;
+        }
+
+        .runoff-arrow {
+            font-size: 1.2rem;
+            color: #1abc9c;
+            margin: 0 10px;
+        }
+
+        .runoff-value {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1abc9c;
+        }
+
+        .runoff-value.blank {
+            color: #e74c3c;
+        }
+
+        .question-info {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 8px;
+            color: #3498db;
+            font-size: 1rem;
+        }
+
+        .choices-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .choice-btn {
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: 80px;
+        }
+
+        .choice-btn:hover:not(.disabled) {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .choice-btn.selected {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.2);
+        }
+
+        .choice-btn.correct {
+            border-color: #27ae60;
+            background: rgba(39, 174, 96, 0.2);
+        }
+
+        .choice-btn.incorrect {
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.2);
+        }
+
+        .choice-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .choice-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .equations-box {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .equations-title {
+            color: #3498db;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .equation-grid {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .equation {
+            font-family: 'Courier New', monospace;
+            padding: 6px 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .feedback.correct {
+            display: block;
+            background: rgba(39, 174, 96, 0.2);
+            border: 2px solid #27ae60;
+            color: #27ae60;
+        }
+
+        .feedback.incorrect {
+            display: block;
+            background: rgba(231, 76, 60, 0.2);
+            border: 2px solid #e74c3c;
+            color: #e74c3c;
+        }
+
+        .verification {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .verification.show {
+            display: block;
+        }
+
+        .verification-title {
+            color: #3498db;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .verification-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            margin: 4px 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 0.8rem;
+        }
+
+        .verification-status {
+            font-weight: bold;
+        }
+
+        .verification-status.balanced {
+            color: #27ae60;
+        }
+
+        @media (max-width: 600px) {
+            .surface-section {
+                flex-direction: column;
+            }
+            .region {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-btn">← 모드 선택</a>
+            <div class="score-display">점수: <span id="score">0</span> / <span id="total">0</span></div>
+        </div>
+
+        <div class="title">
+            <h1>💧 물수지 평형 - 객관식</h1>
+            <p>5개의 보기 중 정답을 선택하세요</p>
+        </div>
+
+        <div class="diagram-container">
+            <div class="diagram">
+                <!-- 대기 영역 -->
+                <div class="atmosphere">
+                    <div class="atmosphere-title">☁️ 대기</div>
+                    <div class="storage-box">
+                        <div class="storage-label">대기 중 수증기 (W)</div>
+                        <div class="storage-value" id="W"></div>
+                    </div>
+                </div>
+
+                <!-- 화살표 -->
+                <div class="arrows-section">
+                    <div class="arrow-group">
+                        <span class="arrow-up">↑ 증발</span>
+                        <span class="arrow-down">↓ 강수</span>
+                        <span class="arrow-label">육지</span>
+                    </div>
+                    <div class="arrow-group">
+                        <span class="arrow-up">↑ 증발</span>
+                        <span class="arrow-down">↓ 강수</span>
+                        <span class="arrow-label">해양</span>
+                    </div>
+                </div>
+
+                <!-- 지표면 -->
+                <div class="surface-section">
+                    <div class="region land">
+                        <div class="region-title">🏔️ 육지</div>
+                        <div class="variable-row">
+                            <span class="variable-label">강수량 (Pₗ)</span>
+                            <span class="variable-value" id="P_l"></span>
+                        </div>
+                        <div class="variable-row">
+                            <span class="variable-label">증발량 (Eₗ)</span>
+                            <span class="variable-value" id="E_l"></span>
+                        </div>
+                    </div>
+
+                    <div class="runoff-section">
+                        <span class="runoff-label">유출량 (R)</span>
+                        <span class="runoff-arrow">→</span>
+                        <span class="runoff-value" id="R"></span>
+                    </div>
+
+                    <div class="region ocean">
+                        <div class="region-title">🌊 해양</div>
+                        <div class="variable-row">
+                            <span class="variable-label">강수량 (Pₒ)</span>
+                            <span class="variable-value" id="P_o"></span>
+                        </div>
+                        <div class="variable-row">
+                            <span class="variable-label">증발량 (Eₒ)</span>
+                            <span class="variable-value" id="E_o"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="question-info" id="questionInfo"></div>
+
+        <div class="equations-box">
+            <div class="equations-title">💡 핵심 보존식</div>
+            <div class="equation-grid">
+                <div class="equation">육지: Pₗ = Eₗ + R</div>
+                <div class="equation">해양: Eₒ = Pₒ + R</div>
+                <div class="equation">대기: W = Pₗ + Pₒ = Eₗ + Eₒ</div>
+            </div>
+        </div>
+
+        <div class="choices-container" id="choices"></div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="nextProblem()">다음 문제</button>
+        </div>
+
+        <div class="verification" id="verification">
+            <div class="verification-title">📊 보존식 검증 결과</div>
+            <div id="verificationContent"></div>
+        </div>
+    </div>
+
+    <script src="core.js"></script>
+    <script>
+        let currentProblem = null;
+        let currentBlank = null;
+        let correctAnswer = null;
+        let choices = [];
+        let score = 0;
+        let total = 0;
+        let answered = false;
+
+        function displayProblem() {
+            currentProblem = generateProblem();
+            answered = false;
+
+            // 객관식은 빈칸 1개만 사용
+            currentBlank = currentProblem.blanks[0];
+            correctAnswer = currentProblem.answers[currentBlank];
+
+            // 빈칸이 2개 이상이면 첫 번째만 빈칸으로, 나머지는 값 표시
+            if (currentProblem.blanks.length > 1) {
+                for (let i = 1; i < currentProblem.blanks.length; i++) {
+                    const extraBlank = currentProblem.blanks[i];
+                    currentProblem.displayData[extraBlank] = currentProblem.dataset[extraBlank];
+                }
+            }
+
+            document.getElementById('verification').classList.remove('show');
+            document.getElementById('feedback').className = 'feedback';
+
+            const variables = ['R', 'E_l', 'P_l', 'E_o', 'P_o', 'W'];
+
+            variables.forEach(varName => {
+                const element = document.getElementById(varName);
+                if (!element) return;
+
+                const value = currentProblem.displayData[varName];
+
+                if (value === null) {
+                    element.textContent = '?';
+                    element.classList.add('blank');
+                } else {
+                    element.textContent = value;
+                    element.classList.remove('blank');
+                }
+            });
+
+            // 질문 표시
+            const varInfo = VARIABLES[currentBlank];
+            document.getElementById('questionInfo').textContent =
+                `❓ ${varInfo.label} (${varInfo.name})의 값은?`;
+
+            // 보기 생성
+            const wrongAnswers = generateAttractiveWrongAnswers(correctAnswer, currentBlank, currentProblem.dataset);
+            choices = generateChoices(correctAnswer, wrongAnswers);
+
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+
+            choices.forEach((choice, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.innerHTML = `
+                    <span class="choice-number">${index + 1}</span>
+                    <span>${choice}</span>
+                `;
+                btn.onclick = () => selectChoice(index, btn);
+                choicesContainer.appendChild(btn);
+            });
+        }
+
+        function selectChoice(index, btn) {
+            if (answered) return;
+            answered = true;
+
+            const selectedValue = choices[index];
+            const isCorrect = selectedValue === correctAnswer;
+
+            // 모든 버튼 비활성화
+            document.querySelectorAll('.choice-btn').forEach(b => {
+                b.classList.add('disabled');
+            });
+
+            // 선택한 버튼 스타일
+            if (isCorrect) {
+                btn.classList.add('correct');
+            } else {
+                btn.classList.add('incorrect');
+                // 정답 표시
+                document.querySelectorAll('.choice-btn').forEach((b, i) => {
+                    if (choices[i] === correctAnswer) {
+                        b.classList.add('correct');
+                    }
+                });
+            }
+
+            // 피드백
+            total++;
+            const feedback = document.getElementById('feedback');
+
+            if (isCorrect) {
+                score++;
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `🎉 정답입니다! ${VARIABLES[currentBlank].name} = ${correctAnswer}`;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `❌ 오답입니다. 정답은 ${VARIABLES[currentBlank].name} = ${correctAnswer}`;
+            }
+
+            document.getElementById('score').textContent = score;
+            document.getElementById('total').textContent = total;
+
+            // 검증 결과 표시
+            showVerification();
+        }
+
+        function showVerification() {
+            const verification = verifyConservation(currentProblem.dataset);
+            const container = document.getElementById('verificationContent');
+
+            container.innerHTML = `
+                <div class="verification-row">
+                    <span>육지 물수지: ${verification.land.equation}</span>
+                    <span class="verification-status balanced">✓ 균형</span>
+                </div>
+                <div class="verification-row">
+                    <span>해양 물수지: ${verification.ocean.equation}</span>
+                    <span class="verification-status balanced">✓ 균형</span>
+                </div>
+                <div class="verification-row">
+                    <span>대기(강수): ${verification.atmosphere.equation}</span>
+                    <span class="verification-status balanced">✓ 균형</span>
+                </div>
+                <div class="verification-row">
+                    <span>대기(증발): ${verification.evaporation.equation}</span>
+                    <span class="verification-status balanced">✓ 균형</span>
+                </div>
+            `;
+
+            document.getElementById('verification').classList.add('show');
+        }
+
+        function nextProblem() {
+            displayProblem();
+        }
+
+        // 키보드 단축키 (1-5)
+        document.addEventListener('keypress', function(e) {
+            if (answered) return;
+
+            const num = parseInt(e.key);
+            if (num >= 1 && num <= 5) {
+                const btns = document.querySelectorAll('.choice-btn');
+                if (btns[num - 1]) {
+                    selectChoice(num - 1, btns[num - 1]);
+                }
+            }
+        });
+
+        // 초기화
+        displayProblem();
+    </script>
+</body>
+</html>
