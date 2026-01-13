@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>복사평형 퀴즈 - 객관식</title>
+    <script src="../theme.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-tertiary: #0f3460;
+            --text-primary: #fff;
+            --text-secondary: #aaa;
+            --text-muted: #888;
+            --card-bg: rgba(255,255,255,0.05);
+            --card-bg-hover: rgba(255,255,255,0.12);
+            --item-bg: rgba(255,255,255,0.08);
+            --border-color: rgba(255,255,255,0.2);
+            --choice-text: #fff;
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #e8ecf1;
+            --bg-tertiary: #dce3eb;
+            --text-primary: #1a1a1a;
+            --text-secondary: #333333;
+            --text-muted: #555555;
+            --card-bg: rgba(255,255,255,0.9);
+            --card-bg-hover: rgba(255,255,255,0.98);
+            --item-bg: rgba(0,0,0,0.06);
+            --border-color: rgba(0,0,0,0.2);
+            --choice-text: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: var(--item-bg);
+            border: none;
+            color: var(--text-secondary);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: var(--card-bg-hover);
+            color: var(--text-primary);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .mode-badge {
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid #3498db;
+            color: #3498db;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: var(--item-bg);
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .energy-diagram {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title.solar { color: #f39c12; border-color: #f39c12; }
+        .section-title.surface { color: #27ae60; border-color: #27ae60; }
+        .section-title.atmosphere { color: #3498db; border-color: #3498db; }
+
+        .icon { font-size: 1.3rem; }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .item {
+            background: var(--item-bg);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .item:hover { background: var(--card-bg-hover); }
+
+        .item-name { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .item-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .item-value.unknown {
+            background: rgba(52, 152, 219, 0.3);
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 5px 15px;
+            color: #3498db;
+        }
+
+        /* 객관식 보기 스타일 */
+        .choices-container {
+            margin: 25px 0;
+        }
+
+        .choices-title {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .choices-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        @media (max-width: 700px) {
+            .choices-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 450px) {
+            .choices-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .choice-btn {
+            background: var(--item-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .choice-btn:hover:not(.disabled) {
+            background: rgba(52, 152, 219, 0.2);
+            border-color: #3498db;
+            transform: translateY(-3px);
+        }
+
+        .choice-btn.selected {
+            background: rgba(52, 152, 219, 0.3);
+            border-color: #3498db;
+        }
+
+        .choice-btn.correct {
+            background: rgba(39, 174, 96, 0.4);
+            border-color: #27ae60;
+            animation: correctPulse 0.5s ease-out;
+        }
+
+        .choice-btn.wrong {
+            background: rgba(231, 76, 60, 0.4);
+            border-color: #e74c3c;
+            animation: wrongShake 0.3s ease-out;
+        }
+
+        .choice-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .choice-btn.show-correct {
+            background: rgba(39, 174, 96, 0.3);
+            border-color: #27ae60;
+        }
+
+        .choice-number {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .choice-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--choice-text);
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn-new {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-hint {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+
+        .btn-hint:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(155, 89, 182, 0.4);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            display: none;
+        }
+
+        .result.correct {
+            background: rgba(39, 174, 96, 0.3);
+            border: 2px solid #27ae60;
+            display: block;
+        }
+
+        .result.wrong {
+            background: rgba(231, 76, 60, 0.3);
+            border: 2px solid #e74c3c;
+            display: block;
+        }
+
+        .hint-box {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(155, 89, 182, 0.2);
+            border: 2px solid #9b59b6;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .hint-box.show { display: block; }
+
+        .hint-title {
+            color: #9b59b6;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.2);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .difficulty-btn {
+            padding: 8px 20px;
+            background: var(--item-bg);
+            border: 2px solid transparent;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .difficulty-btn.active {
+            border-color: #3498db;
+            color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .difficulty-btn:hover { background: var(--card-bg-hover); }
+
+        /* 오답 분석 */
+        .wrong-analysis {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #e74c3c;
+            display: none;
+        }
+
+        .wrong-analysis.show { display: block; }
+
+        .wrong-analysis-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index.html" class="back-btn">← 메인으로</a>
+            <h1>🔘 객관식 모드</h1>
+            <span class="mode-badge">5지선다</span>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">점수</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="streak">0</div>
+                <div class="stat-label">연속 정답</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="total">0</div>
+                <div class="stat-label">총 문제</div>
+            </div>
+        </div>
+
+        <div class="difficulty-selector">
+            <button class="difficulty-btn active" data-difficulty="easy">쉬움</button>
+            <button class="difficulty-btn" data-difficulty="normal">보통</button>
+            <button class="difficulty-btn" data-difficulty="hard">어려움</button>
+        </div>
+
+        <div class="energy-diagram">
+            <div class="section">
+                <div class="section-title solar">
+                    <span class="icon">☀️</span> 태양 복사 (단파)
+                </div>
+                <div class="items-grid">
+                    <div class="item"><span class="item-name">태양 복사 총량</span><span class="item-value" id="S"></span></div>
+                    <div class="item"><span class="item-name">대기 반사</span><span class="item-value" id="Ra"></span></div>
+                    <div class="item"><span class="item-name">지표 반사</span><span class="item-value" id="Rs"></span></div>
+                    <div class="item"><span class="item-name">대기 흡수</span><span class="item-value" id="Aa"></span></div>
+                    <div class="item"><span class="item-name">지표 흡수</span><span class="item-value" id="As"></span></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title surface">
+                    <span class="icon">🌍</span> 지표 에너지
+                </div>
+                <div class="items-grid">
+                    <div class="item"><span class="item-name">대류·전도</span><span class="item-value" id="H"></span></div>
+                    <div class="item"><span class="item-name">잠열</span><span class="item-value" id="LE"></span></div>
+                    <div class="item"><span class="item-name">지표 복사</span><span class="item-value" id="Lup"></span></div>
+                    <div class="item"><span class="item-name">지표→우주 직행</span><span class="item-value" id="Lspace"></span></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title atmosphere">
+                    <span class="icon">🌫️</span> 대기 에너지
+                </div>
+                <div class="items-grid">
+                    <div class="item"><span class="item-name">대기→우주 방출</span><span class="item-value" id="LaSpace"></span></div>
+                    <div class="item"><span class="item-name">대기 재복사</span><span class="item-value" id="LaSfc"></span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="choices-container">
+            <div class="choices-title">아래 보기 중 정답을 선택하세요</div>
+            <div class="choices-grid" id="choicesGrid">
+                <!-- 보기가 여기에 동적으로 생성됨 -->
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn-hint" onclick="showHint()">힌트 보기</button>
+            <button class="btn-new" onclick="generateNewProblem()">새 문제</button>
+        </div>
+
+        <div class="result" id="result"></div>
+
+        <div class="wrong-analysis" id="wrongAnalysis">
+            <div class="wrong-analysis-title">💭 오답 분석</div>
+            <div id="wrongAnalysisContent"></div>
+        </div>
+
+        <div class="hint-box" id="hintBox">
+            <div class="hint-title">💡 힌트</div>
+            <div id="hintContent"></div>
+        </div>
+    </div>
+
+    <script src="core.js"></script>
+    <script>
+        // 게임 상태
+        let gameState = {
+            score: 0,
+            streak: 0,
+            total: 0,
+            difficulty: 'easy',
+            currentProblem: null,
+            unknownKey: null,
+            correctAnswer: null,
+            choices: [],
+            answered: false
+        };
+
+        // 오답 원인 설명 (학습 목적)
+        const wrongAnswerExplanations = {
+            S: '태양 복사 총량은 반사와 흡수를 모두 더해야 합니다.',
+            Ra: '대기 반사를 구할 때 총량에서 다른 항목들을 빼야 합니다. 부호에 주의하세요.',
+            Rs: '지표 반사를 구할 때 총량에서 다른 항목들을 빼야 합니다.',
+            Aa: '대기 흡수는 태양 복사 분배 공식을 사용합니다.',
+            As: '지표 흡수는 태양 복사 총량에서 반사와 대기흡수를 뺀 값입니다.',
+            H: '대류·전도는 지표 평형 공식을 사용합니다. 유입과 유출의 부호를 확인하세요.',
+            LE: '잠열은 지표 평형 공식을 사용합니다. 대기 재복사도 유입에 포함됩니다.',
+            Lup: '지표 복사는 지표 평형 공식에서 구합니다.',
+            Lspace: '지표→우주 직행은 대기창을 통과하는 복사입니다.',
+            LaSpace: '대기→우주 방출은 대기 평형 공식 또는 TOA 평형을 사용합니다.',
+            LaSfc: '대기 재복사는 대기 평형 공식에서 구합니다.'
+        };
+
+        function generateNewProblem() {
+            document.getElementById('hintBox').classList.remove('show');
+            document.getElementById('result').className = 'result';
+            document.getElementById('wrongAnalysis').classList.remove('show');
+            gameState.answered = false;
+
+            const data = generateBalancedDataset(gameState.difficulty);
+            const verification = verifyConservation(data);
+
+            if (!verification.solar || !verification.surface || !verification.atmosphere) {
+                generateNewProblem();
+                return;
+            }
+
+            const settings = difficultySettings[gameState.difficulty];
+            const unknownKey = settings.unknownOptions[Math.floor(Math.random() * settings.unknownOptions.length)];
+
+            gameState.currentProblem = { ...data };
+            gameState.unknownKey = unknownKey;
+            gameState.correctAnswer = data[unknownKey];
+
+            // 5지선다 보기 생성
+            gameState.choices = generateChoices(gameState.correctAnswer, unknownKey, data);
+
+            renderProblem(data, unknownKey);
+            renderChoices();
+        }
+
+        function renderProblem(data, unknownKey) {
+            const keys = ['S', 'Ra', 'Rs', 'Aa', 'As', 'H', 'LE', 'Lup', 'Lspace', 'LaSpace', 'LaSfc'];
+
+            keys.forEach(key => {
+                const element = document.getElementById(key);
+                if (key === unknownKey) {
+                    element.textContent = '?';
+                    element.classList.add('unknown');
+                } else {
+                    element.textContent = data[key];
+                    element.classList.remove('unknown');
+                }
+            });
+        }
+
+        function renderChoices() {
+            const grid = document.getElementById('choicesGrid');
+            grid.innerHTML = '';
+
+            const labels = ['①', '②', '③', '④', '⑤'];
+
+            gameState.choices.forEach((value, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'choice-btn';
+                btn.innerHTML = `
+                    <div class="choice-number">${labels[index]}</div>
+                    <div class="choice-value">${value}</div>
+                `;
+                btn.onclick = () => selectChoice(index, btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        function selectChoice(index, btnElement) {
+            if (gameState.answered) return;
+
+            gameState.answered = true;
+            gameState.total++;
+
+            const selectedValue = gameState.choices[index];
+            const isCorrect = selectedValue === gameState.correctAnswer;
+
+            // 모든 버튼 비활성화
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.classList.add('disabled');
+            });
+
+            const resultDiv = document.getElementById('result');
+
+            if (isCorrect) {
+                gameState.streak++;
+                gameState.score += 10 * gameState.streak;
+
+                btnElement.classList.add('correct');
+                resultDiv.textContent = `🎉 정답입니다! (+${10 * gameState.streak}점)`;
+                resultDiv.className = 'result correct';
+
+                // 정답 위치에 정답 표시
+                document.getElementById(gameState.unknownKey).textContent = gameState.correctAnswer;
+            } else {
+                gameState.streak = 0;
+
+                btnElement.classList.add('wrong');
+                resultDiv.textContent = `❌ 틀렸습니다. 정답은 ${gameState.correctAnswer}입니다.`;
+                resultDiv.className = 'result wrong';
+
+                // 정답 보기 하이라이트
+                const correctIndex = gameState.choices.indexOf(gameState.correctAnswer);
+                document.querySelectorAll('.choice-btn')[correctIndex].classList.add('show-correct');
+
+                // 정답 위치에 정답 표시
+                document.getElementById(gameState.unknownKey).textContent = gameState.correctAnswer;
+
+                // 오답 분석 표시
+                showWrongAnalysis(selectedValue);
+            }
+
+            updateStats();
+        }
+
+        function showWrongAnalysis(selectedValue) {
+            const analysisDiv = document.getElementById('wrongAnalysis');
+            const contentDiv = document.getElementById('wrongAnalysisContent');
+
+            const explanation = wrongAnswerExplanations[gameState.unknownKey];
+            const diff = selectedValue - gameState.correctAnswer;
+
+            let analysis = `<p>${explanation}</p>`;
+            analysis += `<p style="margin-top:10px; color:var(--text-secondary);">선택한 값(${selectedValue})은 정답(${gameState.correctAnswer})보다 ${Math.abs(diff)}만큼 ${diff > 0 ? '큽니다' : '작습니다'}.</p>`;
+
+            contentDiv.innerHTML = analysis;
+            analysisDiv.classList.add('show');
+        }
+
+        function showHint() {
+            const hintBox = document.getElementById('hintBox');
+            const hintContent = document.getElementById('hintContent');
+            const hint = hintFormulas[gameState.unknownKey];
+
+            if (hint) {
+                hintContent.innerHTML = `<p>${hint.explanation}</p><div class="formula">${hint.equation}</div>`;
+            } else {
+                hintContent.innerHTML = '<p>에너지 보존 법칙을 이용해보세요!</p>';
+            }
+
+            hintBox.classList.add('show');
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('streak').textContent = gameState.streak;
+            document.getElementById('total').textContent = gameState.total;
+        }
+
+        function setDifficulty(difficulty) {
+            gameState.difficulty = difficulty;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.difficulty === difficulty);
+            });
+            generateNewProblem();
+        }
+
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => setDifficulty(btn.dataset.difficulty));
+        });
+
+        generateNewProblem();
+    </script>
+</body>
+</html>
