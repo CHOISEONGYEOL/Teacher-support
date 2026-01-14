@@ -3,7 +3,7 @@ const PROTECTED_LINKS = [
     'https://mapro-tool.web.app/',
     'https://mapro-tool.web.app/dir.html'
 ];
-const PASSWORD = '1234'; // 원하는 비밀번호로 변경
+const PASSWORD = '78910'; // 원하는 비밀번호로 변경
 
 document.addEventListener('DOMContentLoaded', function() {
     // 보호된 링크 클릭 시 가로채기
