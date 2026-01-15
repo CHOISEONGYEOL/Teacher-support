@@ -41,3 +41,7 @@ flagged/
 
 # Logs
 *.log
+
+# Fair-Vote-Counting
+static/Fair-Vote-Counting/frontend/.env
+static/Fair-Vote-Counting/frontend/node_modules/

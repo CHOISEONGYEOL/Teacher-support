@@ -1,0 +1,47 @@
+/* ===================================
+   투표 참가 페이지 스타일
+   =================================== */
+
+.join-room-page {
+  min-height: 100vh;
+}
+
+.join-form {
+  margin-top: -20px;
+  text-align: center;
+}
+
+.code-input {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+}
+
+.code-input::placeholder {
+  letter-spacing: 4px;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+/* QR 힌트 */
+.qr-hint {
+  margin-top: 32px;
+  text-align: center;
+  padding: 24px;
+  background: #f0f9ff;
+  border-radius: 16px;
+  border: 1px dashed #38bdf8;
+}
+
+.qr-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+}
+
+.qr-hint p {
+  color: #0369a1;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
