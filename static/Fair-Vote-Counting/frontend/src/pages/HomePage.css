@@ -1,41 +1,50 @@
 /* ===================================
-   홈페이지 스타일 - 한 화면 레이아웃
+   홈페이지 스타일 - 2페이지 풀스크린 레이아웃
    =================================== */
 
 .home-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100vh;
 }
 
-/* 히어로 섹션 - 컴팩트 */
+/* ===== 첫 번째 화면: 히어로 ===== */
 .hero-section {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  height: 100vh;
+  scroll-snap-align: start;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
   color: white;
-  padding: 32px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
+  padding: 20px;
+  position: relative;
 }
 
 .hero-content h1 {
-  font-size: 2rem;
-  margin-bottom: 8px;
+  font-size: 3rem;
+  margin-bottom: 16px;
 }
 
 .hero-subtitle {
-  font-size: 1rem;
+  font-size: 1.3rem;
   opacity: 0.9;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
+  line-height: 1.6;
 }
 
 .hero-buttons {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
-.hero-buttons .btn {
-  padding: 10px 24px;
-  font-size: 0.95rem;
+.hero-buttons .btn-large {
+  padding: 14px 32px;
+  font-size: 1.1rem;
 }
 
 .hero-buttons .btn-outline {
@@ -45,137 +54,159 @@
 
 .hero-buttons .btn-outline:hover {
   background: white;
-  color: #4f46e5;
+  color: #2563eb;
 }
 
-/* 메인 콘텐츠 - 2단 레이아웃 */
-.main-content {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-  padding: 24px 32px;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+/* 스크롤 힌트 */
+.scroll-hint {
+  position: absolute;
+  bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.7;
+  animation: bounce 2s infinite;
+}
+
+.scroll-hint span {
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.scroll-arrow {
+  font-size: 1.5rem;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* ===== 두 번째 화면: 정보 섹션 ===== */
+.info-section {
+  min-height: 100vh;
+  scroll-snap-align: start;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  padding: 60px 40px 40px;
   box-sizing: border-box;
 }
 
-/* 특징 섹션 */
-.features-section h2,
-.how-it-works h2 {
-  font-size: 1.1rem;
-  color: #1e293b;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-.features-grid {
+.info-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 50px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.feature-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #f8fafc;
-  border-radius: 10px;
-  padding: 12px 16px;
+/* 섹션 타이틀 */
+.features-section h2,
+.how-it-works h2 {
+  font-size: 1.6rem;
+  color: #1e293b;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+/* 카드 그리드 - 4열 */
+.features-grid,
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+/* 카드 공통 스타일 */
+.feature-card,
+.step-card {
+  background: white;
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.feature-card:hover {
-  transform: translateX(4px);
-  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.15);
+.feature-card:hover,
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
 }
 
-.feature-icon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
-.feature-card h3 {
-  font-size: 0.95rem;
-  margin-bottom: 2px;
-  color: #1e293b;
-}
-
-.feature-card p {
-  color: #64748b;
-  font-size: 0.85rem;
-  margin: 0;
-  line-height: 1.4;
-}
-
-/* 진행 방법 섹션 */
-.how-it-works {
-  background: transparent;
-  padding: 0;
-}
-
-.steps {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.step {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: #f8fafc;
-  padding: 12px 16px;
-  border-radius: 10px;
-}
-
-.step-number {
+/* 아이콘 */
+.feature-icon,
+.step-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  color: white;
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: 8px;
-  flex-shrink: 0;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
 }
 
-.step-content h4 {
-  font-size: 0.95rem;
-  margin-bottom: 2px;
+.feature-icon {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.step-icon {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* 카드 텍스트 */
+.feature-card h3,
+.step-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
   color: #1e293b;
 }
 
-.step-content p {
+.feature-card p,
+.step-card p {
   color: #64748b;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   margin: 0;
+  line-height: 1.6;
 }
 
-/* 푸터 - 최소화 */
+/* 푸터 */
 .home-footer {
   text-align: center;
-  padding: 12px 20px;
+  padding: 24px 20px;
   color: #94a3b8;
-  font-size: 0.8rem;
-  background: #f8fafc;
+  font-size: 0.85rem;
 }
 
-/* 반응형 - 모바일 */
-@media (max-width: 768px) {
-  .main-content {
-    grid-template-columns: 1fr;
-    gap: 24px;
-    padding: 20px;
+/* ===== 반응형 - 태블릿 ===== */
+@media (max-width: 1024px) {
+  .features-grid,
+  .steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===== 반응형 - 모바일 ===== */
+@media (max-width: 640px) {
+  .hero-content h1 {
+    font-size: 2rem;
   }
 
-  .hero-content h1 {
-    font-size: 1.75rem;
+  .hero-subtitle {
+    font-size: 1.1rem;
   }
 
   .hero-buttons {
@@ -185,6 +216,27 @@
 
   .hero-buttons .btn {
     width: 100%;
-    max-width: 240px;
+    max-width: 280px;
+  }
+
+  .info-section {
+    padding: 40px 20px 24px;
+  }
+
+  .features-grid,
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .features-section h2,
+  .how-it-works h2 {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+
+  .feature-card,
+  .step-card {
+    padding: 20px;
   }
 }

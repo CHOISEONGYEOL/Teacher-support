@@ -9,10 +9,10 @@
 }
 
 :root {
-  /* 색상 팔레트 */
-  --primary: #4f46e5;
-  --primary-dark: #4338ca;
-  --primary-light: #818cf8;
+  /* 색상 팔레트 - 파란색 계열 */
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #60a5fa;
   --secondary: #10b981;
   --secondary-dark: #059669;
   --accent: #f59e0b;
