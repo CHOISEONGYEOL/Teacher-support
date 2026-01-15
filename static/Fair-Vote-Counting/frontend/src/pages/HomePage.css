@@ -1,36 +1,41 @@
 /* ===================================
-   홈페이지 스타일
+   홈페이지 스타일 - 한 화면 레이아웃
    =================================== */
 
 .home-page {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
-/* 히어로 섹션 */
+/* 히어로 섹션 - 컴팩트 */
 .hero-section {
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   color: white;
-  padding: 80px 20px;
+  padding: 32px 20px;
   text-align: center;
 }
 
 .hero-content h1 {
-  font-size: 3rem;
-  margin-bottom: 16px;
+  font-size: 2rem;
+  margin-bottom: 8px;
 }
 
 .hero-subtitle {
-  font-size: 1.3rem;
+  font-size: 1rem;
   opacity: 0.9;
-  margin-bottom: 32px;
-  line-height: 1.6;
+  margin-bottom: 20px;
 }
 
 .hero-buttons {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   justify-content: center;
-  flex-wrap: wrap;
+}
+
+.hero-buttons .btn {
+  padding: 10px 24px;
+  font-size: 0.95rem;
 }
 
 .hero-buttons .btn-outline {
@@ -43,120 +48,134 @@
   color: #4f46e5;
 }
 
-/* 특징 섹션 */
-.features-section {
-  padding: 60px 20px;
+/* 메인 콘텐츠 - 2단 레이아웃 */
+.main-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  padding: 24px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.features-section h2 {
-  margin-bottom: 40px;
+/* 특징 섹션 */
+.features-section h2,
+.how-it-works h2 {
+  font-size: 1.1rem;
+  color: #1e293b;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e2e8f0;
 }
 
 .features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .feature-card {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.15);
 }
 
 .feature-icon {
-  font-size: 2.5rem;
-  margin-bottom: 16px;
+  font-size: 1.5rem;
+  flex-shrink: 0;
 }
 
 .feature-card h3 {
-  font-size: 1.2rem;
-  margin-bottom: 12px;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
   color: #1e293b;
 }
 
 .feature-card p {
   color: #64748b;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.4;
 }
 
 /* 진행 방법 섹션 */
 .how-it-works {
-  padding: 60px 20px;
-  background: #f8fafc;
-}
-
-.how-it-works h2 {
-  margin-bottom: 40px;
+  background: transparent;
+  padding: 0;
 }
 
 .steps {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  max-width: 600px;
-  margin: 0 auto;
+  gap: 10px;
 }
 
 .step {
   display: flex;
-  align-items: flex-start;
-  gap: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-radius: 10px;
 }
 
 .step-number {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
   color: white;
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 700;
-  border-radius: 12px;
+  border-radius: 8px;
   flex-shrink: 0;
 }
 
 .step-content h4 {
-  margin-bottom: 4px;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
   color: #1e293b;
 }
 
 .step-content p {
   color: #64748b;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   margin: 0;
 }
 
-/* 푸터 */
+/* 푸터 - 최소화 */
 .home-footer {
   text-align: center;
-  padding: 32px 20px;
-  color: #64748b;
-  font-size: 0.9rem;
+  padding: 12px 20px;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  background: #f8fafc;
 }
 
-/* 반응형 */
-@media (max-width: 640px) {
-  .hero-content h1 {
-    font-size: 2rem;
+/* 반응형 - 모바일 */
+@media (max-width: 768px) {
+  .main-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 20px;
   }
 
-  .hero-subtitle {
-    font-size: 1.1rem;
+  .hero-content h1 {
+    font-size: 1.75rem;
   }
 
   .hero-buttons {
@@ -166,6 +185,6 @@
 
   .hero-buttons .btn {
     width: 100%;
-    max-width: 280px;
+    max-width: 240px;
   }
 }
