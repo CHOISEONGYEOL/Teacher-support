@@ -5,7 +5,7 @@
  * - 투표 시작/종료 컨트롤
  * - 결과 확인
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {

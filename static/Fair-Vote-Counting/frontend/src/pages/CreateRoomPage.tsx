@@ -1,11 +1,10 @@
 /**
  * 투표방 생성 페이지 (관리자용)
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createRoom } from '../utils/api';
-import { useAdminToken } from '../hooks/useSession';
 import './CreateRoomPage.css';
 
 interface ChoiceInput {

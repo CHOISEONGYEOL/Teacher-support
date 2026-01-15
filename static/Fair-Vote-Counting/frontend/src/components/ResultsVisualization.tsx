@@ -4,7 +4,7 @@
  * - 표 이동 흐름 시각화
  * - 최종 당선자 발표
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart,
@@ -16,7 +16,7 @@ import {
   Cell,
   LabelList,
 } from 'recharts';
-import type { IRVResult, IRVRound, Candidate } from '../utils/api';
+import type { IRVResult, Candidate } from '../utils/api';
 import './ResultsVisualization.css';
 
 interface Props {

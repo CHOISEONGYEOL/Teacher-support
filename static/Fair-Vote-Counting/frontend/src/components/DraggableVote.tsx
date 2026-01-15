@@ -3,7 +3,7 @@
  * - 클릭 순서대로 순위 지정
  * - 다시 클릭하면 선택 취소
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Candidate } from '../utils/api';
 import './DraggableVote.css';

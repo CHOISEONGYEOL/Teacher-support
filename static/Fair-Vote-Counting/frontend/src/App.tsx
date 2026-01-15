@@ -1,7 +1,6 @@
 /**
  * 메인 애플리케이션 - 라우팅 설정
  */
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 // 페이지 컴포넌트
