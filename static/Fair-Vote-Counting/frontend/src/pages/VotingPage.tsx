@@ -78,7 +78,7 @@ export default function VotingPage() {
 
       if (updatedRoom.status === 'active' && pageState === 'waiting') {
         setPageState('voting');
-      } else if (updatedRoom.status === 'closed' && pageState !== 'receipt') {
+      } else if (updatedRoom.status === 'closed' && pageState !== 'receipt' as PageState) {
         setPageState('closed');
       }
     });

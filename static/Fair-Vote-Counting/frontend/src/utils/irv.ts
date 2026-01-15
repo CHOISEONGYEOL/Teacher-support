@@ -117,7 +117,7 @@ export class IRVCalculator {
    * 표 이동 계산
    */
   private calculateTransfers(eliminatedId: number): Record<number | 'exhausted', number> {
-    const transfers: Record<number | 'exhausted', number> = {};
+    const transfers: Record<number | 'exhausted', number> = { exhausted: 0 };
 
     for (const ballot of this.ballots) {
       // 현재 선택이 탈락 후보인 경우
