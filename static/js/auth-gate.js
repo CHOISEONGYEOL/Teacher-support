@@ -1,7 +1,6 @@
 // 보호할 링크들과 비밀번호 설정
 const PROTECTED_LINKS = [
-    'https://mapro-tool.web.app/',
-    'https://mapro-tool.web.app/dir.html'
+    
 ];
 const PASSWORD = '3.141592'; // 원하는 비밀번호로 변경
 
