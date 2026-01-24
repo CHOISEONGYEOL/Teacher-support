@@ -254,3 +254,124 @@ body {
 .section:nth-child(2) { animation-delay: 0.1s; }
 .section:nth-child(3) { animation-delay: 0.2s; }
 .section:nth-child(4) { animation-delay: 0.3s; }
+
+/* ===== 폴더 카드 스타일 ===== */
+.card-folder {
+    cursor: pointer;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    border-color: #6ee7b7;
+    position: relative;
+}
+
+.card-folder:hover {
+    border-color: var(--secondary);
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.card-folder.active {
+    border-color: var(--secondary);
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    margin-bottom: 0;
+}
+
+.folder-toggle {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    transition: transform 0.3s ease;
+}
+
+.card-folder.active .folder-toggle {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+/* ===== 폴더 하위 콘텐츠 ===== */
+.folder-contents {
+    grid-column: 1 / -1;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background: #f0fdf4;
+    border: 1px solid #6ee7b7;
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    margin-top: -20px;
+    margin-bottom: 20px;
+}
+
+.folder-contents.open {
+    display: flex;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== 하위 카드 스타일 ===== */
+.card-sub {
+    padding: 14px 18px;
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    position: relative;
+}
+
+.card-sub .card-icon {
+    font-size: 1.6rem;
+}
+
+.card-sub .card-content h3 {
+    font-size: 1rem;
+}
+
+.card-sub .card-content p {
+    font-size: 0.85rem;
+}
+
+.card-sub:hover {
+    border-color: var(--secondary);
+    background: #f0fdf4;
+}
+
+.card-sub::after {
+    content: '↗';
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.card-sub:hover::after {
+    opacity: 1;
+}
+
+/* 모바일 폴더 대응 */
+@media (max-width: 768px) {
+    .folder-contents {
+        margin-top: -16px;
+    }
+
+    .card-sub {
+        padding: 12px 14px;
+    }
+
+    .card-sub .card-icon {
+        font-size: 1.4rem;
+    }
+}
