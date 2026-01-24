@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alt Code Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        /* 탭 스타일 */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+            border: 2px solid #0f3460;
+            border-radius: 8px;
+            background: #16213e;
+            color: #888;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            border-color: #00d4ff;
+            color: #fff;
+        }
+
+        .tab-btn.active {
+            background: #00d4ff;
+            color: #1a1a2e;
+            border-color: #00d4ff;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 정보 박스 */
+        .info-box {
+            background: #0f3460;
+            border-left: 4px solid #00d4ff;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .info-box h3 {
+            color: #00d4ff;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .info-box p {
+            color: #aaa;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-box code {
+            background: #1a1a2e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #00ff88;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #16213e;
+            border-radius: 12px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        select, input {
+            padding: 10px 15px;
+            font-size: 1rem;
+            border: 2px solid #0f3460;
+            border-radius: 8px;
+            background: #1a1a2e;
+            color: #eee;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            border-color: #00d4ff;
+        }
+
+        select {
+            cursor: pointer;
+            min-width: 200px;
+        }
+
+        input {
+            width: 120px;
+        }
+
+        input.search-input {
+            width: 180px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            background: #00d4ff;
+            color: #1a1a2e;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #00b8e6;
+        }
+
+        .custom-range {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+        }
+
+        .custom-range span {
+            padding-bottom: 12px;
+            color: #888;
+        }
+
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            background: #0f3460;
+            border: 1px solid #1a4a7a;
+            color: #aaa;
+        }
+
+        .preset-btn:hover {
+            background: #1a4a7a;
+            color: #fff;
+        }
+
+        .preset-btn.active {
+            background: #00d4ff;
+            color: #1a1a2e;
+            border-color: #00d4ff;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+
+        .grid.alt-grid {
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+        }
+
+        .char-cell {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            position: relative;
+        }
+
+        .char-cell:hover {
+            background: #0f3460;
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+        }
+
+        .char-cell.highlight {
+            border-color: #e94560;
+            background: #2d1f3d;
+        }
+
+        .char-cell.popular {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #2d2a1f 0%, #1a1a2e 100%);
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .char-cell.popular .character {
+            color: #ffd700;
+        }
+
+        .char-cell.popular .alt-code {
+            color: #ffd700;
+        }
+
+        .char-cell.copied {
+            border-color: #00ff88;
+        }
+
+        .char-cell .character {
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 6px;
+            min-height: 36px;
+            line-height: 36px;
+        }
+
+        .char-cell .code {
+            font-size: 0.7rem;
+            color: #888;
+            font-family: 'Consolas', monospace;
+        }
+
+        .char-cell .alt-code {
+            font-size: 0.75rem;
+            color: #00d4ff;
+            font-family: 'Consolas', monospace;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .char-cell .tooltip {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #00ff88;
+            color: #1a1a2e;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .char-cell.copied .tooltip {
+            opacity: 1;
+        }
+
+        .stats {
+            text-align: center;
+            padding: 12px;
+            background: #16213e;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .stats span {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #2a2a4a;
+            margin-top: 20px;
+        }
+
+        footer code {
+            background: #0f3460;
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: #00d4ff;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 1.2rem;
+            grid-column: 1 / -1;
+        }
+
+        /* 테마 토글 버튼 */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border: 2px solid #0f3460;
+            border-radius: 8px;
+            background: #16213e;
+            color: #888;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            border-color: #00d4ff;
+            color: #fff;
+        }
+
+        /* 라이트 모드 */
+        body.light-mode {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        body.light-mode .theme-toggle {
+            background: #fff;
+            border-color: #ddd;
+            color: #666;
+        }
+
+        body.light-mode .theme-toggle:hover {
+            border-color: #0088cc;
+            color: #333;
+        }
+
+        body.light-mode h1 {
+            color: #0088cc;
+        }
+
+        body.light-mode .info-box {
+            background: #e8f4fc;
+            border-left-color: #0088cc;
+        }
+
+        body.light-mode .info-box h3 {
+            color: #0088cc;
+        }
+
+        body.light-mode .info-box p {
+            color: #555;
+        }
+
+        body.light-mode .info-box code {
+            background: #fff;
+            color: #0088cc;
+        }
+
+        body.light-mode .controls {
+            background: #fff;
+            border: 1px solid #ddd;
+        }
+
+        body.light-mode select,
+        body.light-mode input {
+            background: #fff;
+            border-color: #ddd;
+            color: #333;
+        }
+
+        body.light-mode select:focus,
+        body.light-mode input:focus {
+            border-color: #0088cc;
+        }
+
+        body.light-mode .tab-btn {
+            background: #fff;
+            border-color: #ddd;
+            color: #666;
+        }
+
+        body.light-mode .tab-btn:hover {
+            border-color: #0088cc;
+            color: #333;
+        }
+
+        body.light-mode .tab-btn.active {
+            background: #0088cc;
+            color: #fff;
+            border-color: #0088cc;
+        }
+
+        body.light-mode .stats {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+
+        body.light-mode .stats span {
+            color: #0088cc;
+        }
+
+        body.light-mode .char-cell {
+            background: #fff;
+            border: 2px solid #eee;
+        }
+
+        body.light-mode .char-cell:hover {
+            background: #f0f8ff;
+            border-color: #0088cc;
+        }
+
+        body.light-mode .char-cell .code {
+            color: #666;
+        }
+
+        body.light-mode .char-cell .alt-code {
+            color: #0088cc;
+        }
+
+        body.light-mode .char-cell.popular {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff8e1 0%, #fff 100%);
+            box-shadow: 0 0 8px rgba(255, 152, 0, 0.3);
+        }
+
+        body.light-mode .char-cell.popular .character {
+            color: #e65100;
+        }
+
+        body.light-mode .char-cell.popular .alt-code {
+            color: #e65100;
+        }
+
+        body.light-mode .char-cell.highlight {
+            border-color: #e94560;
+            background: #fff0f3;
+        }
+
+        body.light-mode .preset-btn {
+            background: #fff;
+            border-color: #ddd;
+            color: #666;
+        }
+
+        body.light-mode .preset-btn:hover {
+            background: #f0f8ff;
+            color: #333;
+        }
+
+        body.light-mode .preset-btn.active {
+            background: #0088cc;
+            color: #fff;
+            border-color: #0088cc;
+        }
+
+        body.light-mode footer {
+            border-top-color: #ddd;
+            color: #888;
+        }
+
+        body.light-mode footer code {
+            background: #e8f4fc;
+            color: #0088cc;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn {
+                width: 100%;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .custom-range {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            input, select {
+                width: 100%;
+            }
+
+            input.search-input {
+                width: 100%;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+
+            .char-cell .character {
+                font-size: 1.5rem;
+            }
+
+            .presets {
+                gap: 5px;
+            }
+
+            .preset-btn {
+                font-size: 0.75rem;
+                padding: 5px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="theme-toggle" title="테마 전환">🌙</button>
+
+    <div class="container">
+        <header>
+            <h1>Alt Code Explorer</h1>
+            <p class="subtitle">Windows Alt 코드 & 유니코드 문자 탐색기</p>
+        </header>
+
+        <!-- 탭 버튼 -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="alt">Alt 코드 (0-255)</button>
+            <button class="tab-btn" data-tab="unicode">유니코드 탐색기</button>
+        </div>
+
+        <!-- Alt 코드 탭 -->
+        <div id="alt-tab" class="tab-content active">
+            <div class="info-box">
+                <h3>Windows Alt 코드 사용법 (숫자패드 필수)</h3>
+                <p>
+                    <code>Alt</code> 키를 누른 상태에서 숫자패드로 <code>0</code>으로 시작하는 숫자 입력 (예: Alt+0169 = ©)<br>
+                    <strong>⚠️ 256 이상 입력 시 256으로 나눈 나머지 적용</strong> <span style="color:#888; font-size:0.85em;">(Alt+02206 → 나머지 158)</span><br>
+                    <span style="color:#ffd700;">★ 금색 테두리 = 자주 사용하는 문자</span>
+                </p>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="alt-range-select">구간 선택</label>
+                    <select id="alt-range-select">
+                        <option value="151-200" selected>151 - 200</option>
+                        <option value="0-255">전체 (0-255)</option>
+                        <option value="0-31">제어/특수 문자 (0-31)</option>
+                        <option value="32-127">기본 ASCII (32-127)</option>
+                        <option value="128-255">확장 문자 (128-255)</option>
+                        <option value="0-50">0 - 50</option>
+                        <option value="51-100">51 - 100</option>
+                        <option value="101-150">101 - 150</option>
+                        <option value="201-255">201 - 255</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="alt-search-input">검색</label>
+                    <input type="text" id="alt-search-input" class="search-input" placeholder="코드 또는 문자">
+                </div>
+            </div>
+
+            <div class="stats">
+                현재 표시: <span id="alt-display-count">256</span>개 문자 (<span id="alt-display-range">Alt+0 ~ Alt+255</span>)
+            </div>
+
+            <div id="alt-grid" class="grid alt-grid"></div>
+        </div>
+
+        <!-- 유니코드 탭 -->
+        <div id="unicode-tab" class="tab-content">
+            <div class="info-box">
+                <h3>유니코드 문자 탐색기</h3>
+                <p>
+                    Alt 키로는 입력할 수 없지만, <strong>클릭하여 복사</strong>한 후 붙여넣기 가능<br>
+                    화살표(→), 수학 기호(√), 특수 도형(★) 등 다양한 문자 탐색
+                </p>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <label for="unicode-range-select">구간 선택</label>
+                    <select id="unicode-range-select">
+                        <optgroup label="기본">
+                            <option value="0-255">ANSI (0-255)</option>
+                            <option value="256-511">Latin Extended (256-511)</option>
+                        </optgroup>
+                        <optgroup label="500단위">
+                            <option value="0-499">0 - 499</option>
+                            <option value="500-999">500 - 999</option>
+                            <option value="1000-1499">1000 - 1499</option>
+                            <option value="1500-1999">1500 - 1999</option>
+                            <option value="2000-2499">2000 - 2499</option>
+                            <option value="2500-2999">2500 - 2999</option>
+                            <option value="3000-3499">3000 - 3499</option>
+                            <option value="3500-3999">3500 - 3999</option>
+                            <option value="4000-4499">4000 - 4499</option>
+                            <option value="4500-4999">4500 - 4999</option>
+                            <option value="8000-8499">8000 - 8499</option>
+                            <option value="8500-8999">8500 - 8999</option>
+                            <option value="9000-9499">9000 - 9499</option>
+                            <option value="9500-9999">9500 - 9999</option>
+                        </optgroup>
+                        <optgroup label="한글">
+                            <option value="12593-12643">한글 자모 (ㄱ-ㅣ)</option>
+                            <option value="44032-44531">한글 음절 1 (가-깋)</option>
+                            <option value="44532-45031">한글 음절 2</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>직접 입력</label>
+                    <div class="custom-range">
+                        <input type="number" id="unicode-start-input" placeholder="시작" min="0" max="65535" value="0">
+                        <span>~</span>
+                        <input type="number" id="unicode-end-input" placeholder="끝" min="0" max="65535" value="255">
+                        <button id="unicode-apply-btn">적용</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="unicode-search-input">검색</label>
+                    <input type="text" id="unicode-search-input" class="search-input" placeholder="코드 또는 문자">
+                </div>
+            </div>
+
+            <div class="presets">
+                <button class="preset-btn" data-start="8592" data-end="8703">화살표 ←→</button>
+                <button class="preset-btn" data-start="8704" data-end="8959">수학 기호 ∑√</button>
+                <button class="preset-btn" data-start="9472" data-end="9599">박스 그리기 ┌┐</button>
+                <button class="preset-btn" data-start="9600" data-end="9631">블록 요소 ▀▄</button>
+                <button class="preset-btn" data-start="9632" data-end="9727">도형 ■●◆</button>
+                <button class="preset-btn" data-start="9728" data-end="9983">기호 ★♥♠</button>
+                <button class="preset-btn" data-start="9984" data-end="10175">딩뱃 ✓✗✈</button>
+                <button class="preset-btn" data-start="8352" data-end="8399">통화 €£¥</button>
+                <button class="preset-btn" data-start="8448" data-end="8527">레터 ℃℉™</button>
+                <button class="preset-btn" data-start="880" data-end="1023">그리스어</button>
+                <button class="preset-btn" data-start="1024" data-end="1279">키릴 문자</button>
+            </div>
+
+            <div class="stats">
+                현재 표시: <span id="unicode-display-count">256</span>개 문자 (U+<span id="unicode-display-range">0000-00FF</span>)
+            </div>
+
+            <div id="unicode-grid" class="grid"></div>
+        </div>
+
+        <footer>
+            <p>문자를 클릭하면 클립보드에 복사됩니다</p>
+        </footer>
+    </div>
+
+    <script>
+        // ===== 테마 전환 =====
+        const themeToggle = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme');
+
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeToggle.textContent = '☀️';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            const isLight = document.body.classList.contains('light-mode');
+            themeToggle.textContent = isLight ? '☀️' : '🌙';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
+
+        // ===== 탭 전환 =====
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.dataset.tab;
+
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
+            });
+        });
+
+        // ===== 공통 함수 =====
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function copyToClipboard(char, cell) {
+            try {
+                await navigator.clipboard.writeText(char);
+                cell.classList.add('copied');
+                setTimeout(() => cell.classList.remove('copied'), 1500);
+            } catch (err) {
+                const textarea = document.createElement('textarea');
+                textarea.value = char;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                cell.classList.add('copied');
+                setTimeout(() => cell.classList.remove('copied'), 1500);
+            }
+        }
+
+        // ===== Alt 코드 탭 =====
+        const altGrid = document.getElementById('alt-grid');
+        const altRangeSelect = document.getElementById('alt-range-select');
+        const altSearchInput = document.getElementById('alt-search-input');
+        const altDisplayCount = document.getElementById('alt-display-count');
+        const altDisplayRange = document.getElementById('alt-display-range');
+
+        // CP1252 (Windows ANSI) - Alt + 0숫자
+        const CP1252 = [
+            '\u0000', '\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0006', '\u0007',
+            '\u0008', '\u0009', '\u000A', '\u000B', '\u000C', '\u000D', '\u000E', '\u000F',
+            '\u0010', '\u0011', '\u0012', '\u0013', '\u0014', '\u0015', '\u0016', '\u0017',
+            '\u0018', '\u0019', '\u001A', '\u001B', '\u001C', '\u001D', '\u001E', '\u001F',
+            ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/',
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?',
+            '@', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+            'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '[', '\\', ']', '^', '_',
+            '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o',
+            'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~', '\u007F',
+            '€', '\u0081', '‚', 'ƒ', '„', '…', '†', '‡', 'ˆ', '‰', 'Š', '‹', 'Œ', '\u008D', 'Ž', '\u008F',
+            '\u0090', '\u2018', '\u2019', '\u201C', '\u201D', '•', '–', '—', '˜', '™', 'š', '›', 'œ', '\u009D', 'ž', 'Ÿ',
+            '\u00A0', '¡', '¢', '£', '¤', '¥', '¦', '§', '¨', '©', 'ª', '«', '¬', '\u00AD', '®', '¯',
+            '°', '±', '²', '³', '´', 'µ', '¶', '·', '¸', '¹', 'º', '»', '¼', '½', '¾', '¿',
+            'À', 'Á', 'Â', 'Ã', 'Ä', 'Å', 'Æ', 'Ç', 'È', 'É', 'Ê', 'Ë', 'Ì', 'Í', 'Î', 'Ï',
+            'Ð', 'Ñ', 'Ò', 'Ó', 'Ô', 'Õ', 'Ö', '×', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'Þ', 'ß',
+            'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï',
+            'ð', 'ñ', 'ò', 'ó', 'ô', 'õ', 'ö', '÷', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'þ', 'ÿ'
+        ];
+
+        // 자주 사용하는 인기 문자 코드
+        const POPULAR_CODES = new Set([
+            169,  // © 저작권
+            174,  // ® 등록상표
+            176,  // ° 도
+            177,  // ± 플러스마이너스
+            178,  // ² 제곱
+            179,  // ³ 세제곱
+            181,  // µ 마이크로
+            185,  // ¹ 위첨자1
+            215,  // × 곱하기
+            247,  // ÷ 나누기
+        ]);
+
+        function createAltCell(code) {
+            const cell = document.createElement('div');
+            cell.className = 'char-cell';
+            cell.dataset.code = code;
+
+            // 인기 문자 표시
+            if (POPULAR_CODES.has(code)) {
+                cell.classList.add('popular');
+            }
+
+            const char = CP1252[code] || '';
+
+            let displayChar = char;
+            let isControl = false;
+
+            // 제어 문자 체크
+            const charCode = char.charCodeAt(0);
+            if (charCode < 32 || charCode === 127 || charCode >= 128 && charCode <= 159) {
+                displayChar = '\u2400';
+                isControl = true;
+            }
+
+            // Alt 코드 형식
+            const altCode = `Alt+0${code}`;
+
+            cell.innerHTML = `
+                <span class="character">${escapeHtml(displayChar)}</span>
+                <span class="code">${code}</span>
+                <span class="alt-code">${altCode}</span>
+                <span class="tooltip">복사됨!</span>
+            `;
+
+            if (isControl) {
+                cell.title = `제어 문자 (코드: ${code})`;
+                cell.style.opacity = '0.5';
+            } else {
+                cell.title = `${char} - ${altCode}`;
+            }
+
+            cell.addEventListener('click', () => copyToClipboard(char, cell));
+
+            return cell;
+        }
+
+        function renderAltGrid(start, end, searchQuery = '') {
+            altGrid.innerHTML = '';
+
+            const charTable = CP1252;
+            const fragment = document.createDocumentFragment();
+            let count = 0;
+            const query = searchQuery.trim();
+
+            for (let code = start; code <= end; code++) {
+                const char = charTable[code] || '';
+
+                if (query) {
+                    const codeStr = code.toString();
+                    const matchesCode = codeStr.includes(query);
+                    const matchesChar = char.toLowerCase().includes(query.toLowerCase());
+                    if (!matchesCode && !matchesChar) continue;
+                }
+
+                const cell = createAltCell(code);
+                if (query) cell.classList.add('highlight');
+
+                fragment.appendChild(cell);
+                count++;
+            }
+
+            if (count === 0) {
+                altGrid.innerHTML = '<div class="no-results">검색 결과가 없습니다</div>';
+            } else {
+                altGrid.appendChild(fragment);
+            }
+
+            altDisplayCount.textContent = count;
+            altDisplayRange.textContent = `Alt+0${start} ~ Alt+0${end}`;
+        }
+
+        altRangeSelect.addEventListener('change', () => {
+            const [start, end] = altRangeSelect.value.split('-').map(Number);
+            altSearchInput.value = '';
+            renderAltGrid(start, end);
+        });
+
+        altSearchInput.addEventListener('input', () => {
+            const [start, end] = altRangeSelect.value.split('-').map(Number);
+            renderAltGrid(start, end, altSearchInput.value);
+        });
+
+        // ===== 유니코드 탭 =====
+        const unicodeGrid = document.getElementById('unicode-grid');
+        const unicodeRangeSelect = document.getElementById('unicode-range-select');
+        const unicodeStartInput = document.getElementById('unicode-start-input');
+        const unicodeEndInput = document.getElementById('unicode-end-input');
+        const unicodeApplyBtn = document.getElementById('unicode-apply-btn');
+        const unicodeSearchInput = document.getElementById('unicode-search-input');
+        const unicodeDisplayCount = document.getElementById('unicode-display-count');
+        const unicodeDisplayRange = document.getElementById('unicode-display-range');
+        const presetBtns = document.querySelectorAll('.preset-btn');
+
+        let unicodeCurrentStart = 0;
+        let unicodeCurrentEnd = 255;
+
+        function createUnicodeCell(code) {
+            const cell = document.createElement('div');
+            cell.className = 'char-cell';
+            cell.dataset.code = code;
+
+            const char = String.fromCharCode(code);
+
+            let displayChar = char;
+            let isSpecial = false;
+
+            if (code < 32 || code === 127) {
+                displayChar = '\u2400';
+                isSpecial = true;
+            } else if ((code >= 768 && code <= 879) || (code >= 1155 && code <= 1161)) {
+                displayChar = '\u25CC' + char;
+            } else if (char.trim() === '' && code !== 32) {
+                displayChar = '\u2423';
+                isSpecial = true;
+            }
+
+            const hex = code.toString(16).toUpperCase().padStart(4, '0');
+
+            cell.innerHTML = `
+                <span class="character">${escapeHtml(displayChar)}</span>
+                <span class="code">U+${hex}</span>
+                <span class="tooltip">복사됨!</span>
+            `;
+
+            if (isSpecial) {
+                cell.title = `특수 문자 (U+${hex})`;
+                cell.style.opacity = '0.5';
+            } else {
+                cell.title = `${char} (U+${hex})`;
+            }
+
+            cell.addEventListener('click', () => copyToClipboard(char, cell));
+
+            return cell;
+        }
+
+        function renderUnicodeGrid(start, end, searchQuery = '') {
+            unicodeGrid.innerHTML = '<div class="loading">로딩 중...</div>';
+
+            unicodeCurrentStart = start;
+            unicodeCurrentEnd = end;
+
+            unicodeStartInput.value = start;
+            unicodeEndInput.value = end;
+
+            setTimeout(() => {
+                unicodeGrid.innerHTML = '';
+
+                const fragment = document.createDocumentFragment();
+                let count = 0;
+                const query = searchQuery.trim();
+
+                for (let code = start; code <= end; code++) {
+                    const char = String.fromCharCode(code);
+
+                    if (query) {
+                        const codeStr = code.toString();
+                        const hex = code.toString(16).toUpperCase();
+                        const matchesCode = codeStr.includes(query) || hex.includes(query.toUpperCase());
+                        const matchesChar = char.toLowerCase().includes(query.toLowerCase());
+                        if (!matchesCode && !matchesChar) continue;
+                    }
+
+                    const cell = createUnicodeCell(code);
+                    if (query) cell.classList.add('highlight');
+
+                    fragment.appendChild(cell);
+                    count++;
+                }
+
+                if (count === 0) {
+                    unicodeGrid.innerHTML = '<div class="no-results">검색 결과가 없습니다</div>';
+                } else {
+                    unicodeGrid.appendChild(fragment);
+                }
+
+                const startHex = start.toString(16).toUpperCase().padStart(4, '0');
+                const endHex = end.toString(16).toUpperCase().padStart(4, '0');
+                unicodeDisplayCount.textContent = count.toLocaleString();
+                unicodeDisplayRange.textContent = `${startHex}-${endHex}`;
+            }, 10);
+        }
+
+        unicodeRangeSelect.addEventListener('change', () => {
+            const [start, end] = unicodeRangeSelect.value.split('-').map(Number);
+            unicodeSearchInput.value = '';
+            clearPresetActive();
+            renderUnicodeGrid(start, end);
+        });
+
+        unicodeApplyBtn.addEventListener('click', () => {
+            let start = parseInt(unicodeStartInput.value) || 0;
+            let end = parseInt(unicodeEndInput.value) || 255;
+
+            start = Math.max(0, Math.min(65535, start));
+            end = Math.max(0, Math.min(65535, end));
+
+            if (start > end) [start, end] = [end, start];
+
+            if (end - start > 2000) {
+                if (!confirm(`${(end - start + 1).toLocaleString()}개 문자를 표시합니다. 계속하시겠습니까?`)) {
+                    return;
+                }
+            }
+
+            unicodeSearchInput.value = '';
+            clearPresetActive();
+            renderUnicodeGrid(start, end);
+        });
+
+        unicodeStartInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') unicodeApplyBtn.click();
+        });
+        unicodeEndInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') unicodeApplyBtn.click();
+        });
+
+        unicodeSearchInput.addEventListener('input', () => {
+            renderUnicodeGrid(unicodeCurrentStart, unicodeCurrentEnd, unicodeSearchInput.value);
+        });
+
+        function clearPresetActive() {
+            presetBtns.forEach(btn => btn.classList.remove('active'));
+        }
+
+        presetBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const start = parseInt(btn.dataset.start);
+                const end = parseInt(btn.dataset.end);
+
+                clearPresetActive();
+                btn.classList.add('active');
+                unicodeSearchInput.value = '';
+                renderUnicodeGrid(start, end);
+            });
+        });
+
+        // ===== 초기 렌더링 =====
+        renderAltGrid(151, 200);
+        renderUnicodeGrid(0, 255);
+    </script>
+</body>
+</html>
