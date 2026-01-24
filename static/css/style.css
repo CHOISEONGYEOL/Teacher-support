@@ -293,7 +293,7 @@ body {
 .folder-contents {
     grid-column: 1 / -1;
     display: none;
-    flex-direction: column;
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
     padding: 16px;
     background: #f0fdf4;
@@ -305,7 +305,7 @@ body {
 }
 
 .folder-contents.open {
-    display: flex;
+    display: grid;
     animation: slideDown 0.3s ease;
 }
 
@@ -364,6 +364,7 @@ body {
 /* 모바일 폴더 대응 */
 @media (max-width: 768px) {
     .folder-contents {
+        grid-template-columns: 1fr;
         margin-top: -16px;
     }
 
