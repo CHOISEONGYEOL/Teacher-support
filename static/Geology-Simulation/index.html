@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지층 시뮬레이터 - 지구과학 교육용</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #eee;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1250px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .canvas-wrapper {
+            background: #fff;
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        canvas {
+            display: block;
+            border: 2px solid #333;
+            border-radius: 8px;
+        }
+
+        .controls {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            width: 400px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 12px;
+            font-size: 13px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-deposit { background: linear-gradient(135deg, #4CAF50, #45a049); color: white; }
+        .btn-erode { background: linear-gradient(135deg, #ff9800, #f57c00); color: white; }
+        .btn-fault { background: linear-gradient(135deg, #2196F3, #1976D2); color: white; }
+        .btn-intrusion { background: linear-gradient(135deg, #9c27b0, #7b1fa2); color: white; }
+        .btn-fold { background: linear-gradient(135deg, #00bcd4, #0097a7); color: white; }
+        .btn-reset { background: linear-gradient(135deg, #f44336, #d32f2f); color: white; }
+        .btn-delete { background: linear-gradient(135deg, #ff5252, #d32f2f); color: white; padding: 5px 10px; font-size: 12px; }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            margin: 15px 0;
+        }
+
+        .section-title {
+            color: #fff;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+            font-size: 14px;
+        }
+
+        .timeline {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .timeline-item:hover { background: rgba(255,255,255,0.1); }
+        .timeline-item.selected { background: rgba(255,255,255,0.2); box-shadow: 0 0 0 2px #fff; }
+
+        .timeline-item .order {
+            background: rgba(255,255,255,0.2);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .timeline-item.layer { border-left: 4px solid #4CAF50; }
+        .timeline-item.fault { border-left: 4px solid #2196F3; }
+        .timeline-item.intrusion { border-left: 4px solid #9c27b0; }
+        .timeline-item.sill { border-left: 4px solid #e91e63; }
+        .timeline-item.batholith { border-left: 4px solid #795548; }
+        .timeline-item.erosion { border-left: 4px solid #ff9800; }
+        .timeline-item.fold { border-left: 4px solid #00bcd4; }
+        .timeline-item.tilt { border-left: 4px solid #607d8b; }
+
+        .timeline-item .name { flex: 1; }
+        .timeline-item .color-preview {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid rgba(255,255,255,0.5);
+            flex-shrink: 0;
+        }
+
+        .editor-panel {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .editor-panel.active { display: block; }
+
+        .editor-panel h4 {
+            margin-bottom: 15px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-group {
+            margin-bottom: 12px;
+        }
+
+        .slider-group label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .slider-group label span { color: #fff; font-weight: bold; }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .fault-editor input[type="range"]::-webkit-slider-thumb { background: #2196F3; }
+        .intrusion-editor input[type="range"]::-webkit-slider-thumb { background: #9c27b0; }
+        .fold-editor input[type="range"]::-webkit-slider-thumb { background: #00bcd4; }
+        .erosion-editor input[type="range"]::-webkit-slider-thumb { background: #ff9800; }
+
+        .info-box {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 15px;
+            line-height: 1.5;
+        }
+
+        .empty-msg {
+            color: #888;
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        .badge {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+
+        .badge.layer { background: #4CAF50; }
+        .badge.fault { background: #2196F3; }
+        .badge.intrusion { background: #9c27b0; }
+        .badge.sill { background: #e91e63; }
+        .badge.batholith { background: #795548; }
+        .badge.fold { background: #00bcd4; }
+        .badge.tilt { background: #607d8b; }
+        .badge.erosion { background: #ff9800; }
+
+        .fault-indicator {
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+        }
+
+        .fault-indicator .highlight {
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .sub-label {
+            font-size: 11px;
+            color: #888;
+            margin-left: 5px;
+        }
+
+        .canvas-container {
+            position: relative;
+        }
+
+        .fullscreen-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0,0,0,0.8);
+            transform: scale(1.05);
+        }
+
+        .canvas-wrapper:fullscreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a2e;
+            padding: 0;
+        }
+
+        .canvas-wrapper:fullscreen canvas {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            border: none;
+        }
+
+        .canvas-wrapper:-webkit-full-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a2e;
+            padding: 0;
+        }
+
+        .canvas-wrapper:-webkit-full-screen canvas {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧱 지층 시뮬레이터</h1>
+
+    <div class="container">
+        <div class="canvas-wrapper" id="canvasWrapper">
+            <div class="canvas-container">
+                <canvas id="canvas" width="650" height="480"></canvas>
+                <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ 전체 화면</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="btn-group">
+                <button class="btn-deposit" onclick="addLayer()">🪨 지층 추가</button>
+                <button class="btn-erode" onclick="addErosion()">🌊 침식(부정합)</button>
+                <button class="btn-fold" onclick="addFold()">🌀 습곡 추가</button>
+                <button class="btn-fold" onclick="addTilt()">↗️ 경사(기울기)</button>
+                <button class="btn-fault" onclick="addFault()">📐 단층 추가</button>
+                <button class="btn-intrusion" onclick="addIntrusion()">🔥 암맥 관입</button>
+                <button class="btn-intrusion" onclick="addSill()">🥞 병반 관입</button>
+                <button class="btn-intrusion" onclick="addBatholith()">🍄 저반 관입</button>
+                <button class="btn-reset" onclick="resetAll()">🔄 초기화</button>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section-title">📜 지질 이벤트 순서 (클릭하여 편집)</div>
+            <div class="timeline" id="timeline">
+                <div class="empty-msg">이벤트가 없습니다.<br>위 버튼으로 지층, 습곡, 단층, 관입을 추가하세요.</div>
+            </div>
+
+            <!-- 지층 에디터 -->
+            <div class="editor-panel layer-editor" id="layerEditor">
+                <h4>🪨 지층 설정 <span class="badge layer" id="layerBadge">지층 1</span></h4>
+                <div class="slider-group">
+                    <label>두께: <span id="layerHeightVal">38</span>px</label>
+                    <input type="range" id="layerHeight" min="10" max="500" value="38" oninput="updateLayer()">
+                </div>
+                <div style="margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 4px;">
+                    <span style="font-size: 11px; color: #aaa;">색상:</span>
+                    <div id="layerColorPreview" style="display: inline-block; width: 60px; height: 20px; border-radius: 4px; vertical-align: middle; margin-left: 8px; border: 1px solid rgba(255,255,255,0.3);"></div>
+                </div>
+                <button class="btn-delete" onclick="deleteSelected()">🗑 삭제</button>
+            </div>
+
+            <!-- 단층 에디터 -->
+            <div class="editor-panel fault-editor" id="faultEditor">
+                <h4>📐 단층 설정 <span class="badge fault" id="faultBadge">단층 1</span></h4>
+
+                <div class="fault-indicator" id="faultIndicator">
+                    단층면 기울기: <span class="highlight" id="faultDirection">수직</span><br>
+                    상반: <span class="highlight" id="hangingWallSide">-</span> | 하반: <span class="highlight" id="footwallSide">-</span>
+                </div>
+
+                <div class="slider-group">
+                    <label>위치 (X축): <span id="faultPosVal">50</span>%</label>
+                    <input type="range" id="faultPos" min="10" max="90" value="50" oninput="updateFault()">
+                </div>
+                <div class="slider-group">
+                    <label>단층면 각도: <span id="faultAngleVal">70</span>°</label>
+                    <input type="range" id="faultAngle" min="45" max="135" value="70" oninput="updateFault()">
+                </div>
+                <div class="slider-group">
+                    <label>상반 이동 (↑+/↓-): <span id="faultHangingVal">0</span>px</label>
+                    <input type="range" id="faultHanging" min="-80" max="80" value="0" oninput="updateFault()">
+                </div>
+                <div class="slider-group">
+                    <label>하반 이동 (↑+/↓-): <span id="faultFootVal">0</span>px</label>
+                    <input type="range" id="faultFoot" min="-80" max="80" value="0" oninput="updateFault()">
+                </div>
+                <button class="btn-delete" onclick="deleteSelected()">🗑 삭제</button>
+            </div>
+
+            <!-- 암맥 관입 에디터 -->
+            <div class="editor-panel intrusion-editor" id="intrusionEditor">
+                <h4>🔥 암맥 설정 <span class="badge intrusion" id="intrusionBadge">암맥 1</span></h4>
+                <div class="slider-group">
+                    <label>위치 (X축): <span id="intrusionPosVal">50</span>%</label>
+                    <input type="range" id="intrusionPos" min="5" max="95" value="50" oninput="updateIntrusion()">
+                </div>
+                <div class="slider-group">
+                    <label>각도: <span id="intrusionAngleVal">90</span>°</label>
+                    <input type="range" id="intrusionAngle" min="20" max="160" value="90" oninput="updateIntrusion()">
+                </div>
+                <div class="slider-group">
+                    <label>두께: <span id="intrusionWidthVal">25</span>px</label>
+                    <input type="range" id="intrusionWidth" min="10" max="60" value="25" oninput="updateIntrusion()">
+                </div>
+                <div class="slider-group">
+                    <label>접촉 변성대 두께: <span id="intrusionMetaVal">12</span>px</label>
+                    <input type="range" id="intrusionMeta" min="0" max="40" value="12" oninput="updateIntrusion()">
+                </div>
+                <button class="btn-delete" onclick="deleteSelected()">🗑 삭제</button>
+            </div>
+
+            <!-- 병반 관입 에디터 -->
+            <div class="editor-panel intrusion-editor" id="sillEditor">
+                <h4>🥞 병반 설정 <span class="badge intrusion" id="sillBadge">병반 1</span></h4>
+                <div class="slider-group">
+                    <label>위치 (X축): <span id="sillPosVal">50</span>%</label>
+                    <input type="range" id="sillPos" min="10" max="90" value="50" oninput="updateSill()">
+                </div>
+                <div class="slider-group">
+                    <label>너비: <span id="sillWidthVal">150</span>px</label>
+                    <input type="range" id="sillWidth" min="50" max="800" value="150" oninput="updateSill()">
+                </div>
+                <div class="slider-group">
+                    <label>높이: <span id="sillHeightVal">40</span>px</label>
+                    <input type="range" id="sillHeight" min="15" max="1000" value="40" oninput="updateSill()">
+                </div>
+                <div class="slider-group">
+                    <label>접촉 변성대: <span id="sillMetaVal">10</span>px</label>
+                    <input type="range" id="sillMeta" min="0" max="30" value="10" oninput="updateSill()">
+                </div>
+                <div class="slider-group">
+                    <label>각도: <span id="sillAngleVal">0</span>°</label>
+                    <input type="range" id="sillAngle" min="-30" max="30" value="0" oninput="updateSill()">
+                </div>
+                <button class="btn-delete" onclick="deleteSelected()">🗑 삭제</button>
+            </div>
+
+            <!-- 저반 관입 에디터 -->
+            <div class="editor-panel intrusion-editor" id="batholithEditor">
+                <h4>🍄 저반 설정 <span class="badge batholith" id="batholithBadge">저반 1</span></h4>
+                <div class="slider-group">
+                    <label>위치 (X축): <span id="batholithPosVal">50</span>%</label>
+                    <input type="range" id="batholithPos" min="10" max="90" value="50" oninput="updateBatholith()">
+                </div>
+                <div class="slider-group">
+                    <label>줄기 너비: <span id="batholithStemWidthVal">40</span>px</label>
+                    <input type="range" id="batholithStemWidth" min="20" max="100" value="40" oninput="updateBatholith()">
+                </div>
+                <div class="slider-group">
+                    <label>머리 너비: <span id="batholithHeadWidthVal">200</span>px</label>
+                    <input type="range" id="batholithHeadWidth" min="80" max="2000" value="200" oninput="updateBatholith()">
+                </div>
+                <div class="slider-group">
+                    <label>머리 높이: <span id="batholithHeadHeightVal">60</span>px</label>
+                    <input type="range" id="batholithHeadHeight" min="20" max="150" value="60" oninput="updateBatholith()">
+                </div>
+                <div class="slider-group">
+                    <label>머리 Y위치: <span id="batholithHeadPosYVal">100</span>px</label>
+                    <input type="range" id="batholithHeadPosY" min="20" max="500" value="100" oninput="updateBatholith()">
+                </div>
+                <div class="slider-group">
+                    <label>접촉 변성대: <span id="batholithMetaVal">15</span>px</label>
+                    <input type="range" id="batholithMeta" min="0" max="40" value="15" oninput="updateBatholith()">
+                </div>
+                <div class="slider-group">
+                    <label>줄기 기울기: <span id="batholithStemAngleVal">0</span>°</label>
+                    <input type="range" id="batholithStemAngle" min="-45" max="45" value="0" oninput="updateBatholith()">
+                </div>
+                <button class="btn-delete" onclick="deleteSelected()">🗑 삭제</button>
+            </div>
+
+            <!-- 습곡 에디터 -->
+            <div class="editor-panel fold-editor" id="foldEditor">
+                <h4>🌀 습곡 설정 <span class="badge fold" id="foldBadge">습곡 1</span></h4>
+                <div class="slider-group">
+                    <label>중심 위치 (X축): <span id="foldPosVal">50</span>%</label>
+                    <input type="range" id="foldPos" min="10" max="90" value="50" oninput="updateFold()">
+                </div>
+                <div class="slider-group">
+                    <label>진폭 (휘어짐 강도): <span id="foldAmplitudeVal">40</span>px</label>
+                    <input type="range" id="foldAmplitude" min="10" max="100" value="40" oninput="updateFold()">
+                </div>
+                <div class="slider-group">
+                    <label>파장 (폭): <span id="foldWavelengthVal">200</span>px</label>
+                    <input type="range" id="foldWavelength" min="80" max="2000" value="200" oninput="updateFold()">
+                </div>
+                <button class="btn-delete" onclick="deleteSelected()">🗑 삭제</button>
+            </div>
+
+            <!-- 경사 에디터 -->
+            <div class="editor-panel fold-editor" id="tiltEditor">
+                <h4>↗️ 경사(기울기) 설정 <span class="badge tilt" id="tiltBadge">경사 1</span></h4>
+                <div class="slider-group">
+                    <label>기울기 각도: <span id="tiltAngleVal">0</span>°</label>
+                    <input type="range" id="tiltAngle" min="-30" max="30" value="0" oninput="updateTilt()">
+                </div>
+                <div style="font-size: 11px; color: #aaa; margin: 8px 0;">
+                    음수(-): 왼쪽 기울기 ↙<br>
+                    양수(+): 오른쪽 기울기 ↘
+                </div>
+                <button class="btn-delete" onclick="deleteSelected()">🗑 삭제</button>
+            </div>
+
+            <!-- 침식 에디터 -->
+            <div class="editor-panel erosion-editor" id="erosionEditor">
+                <h4>🌊 침식(부정합) 설정 <span class="badge erosion" id="erosionBadge">침식 1</span></h4>
+                <div class="slider-group">
+                    <label>침식 깊이: <span id="erosionAmountVal">30</span>px</label>
+                    <input type="range" id="erosionAmount" min="-50" max="80" value="30" oninput="updateErosion()">
+                </div>
+                <div class="slider-group">
+                    <label>파형 진폭: <span id="erosionWaveVal">12</span>px</label>
+                    <input type="range" id="erosionWave" min="3" max="30" value="12" oninput="updateErosion()">
+                </div>
+                <div class="slider-group">
+                    <label>파형 주기: <span id="erosionFreqVal">80</span>px</label>
+                    <input type="range" id="erosionFreq" min="30" max="150" value="80" oninput="updateErosion()">
+                </div>
+                <button class="btn-delete" onclick="deleteSelected()">🗑 삭제</button>
+            </div>
+
+            <div class="info-box">
+                💡 <strong>단층 용어:</strong><br>
+                • 상반(Hanging Wall): 단층면 위쪽 블록<br>
+                • 하반(Footwall): 단층면 아래쪽 블록<br>
+                • 정단층: 상반↓ / 역단층: 상반↑
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // 전역 변수 및 상태 관리
+        // ========================================
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const WIDTH = canvas.width;
+        const HEIGHT = canvas.height;
+        const LAYER_HEIGHT = 38;
+
+        // ========================================
+        // 가상 캔버스 시스템 (무한 확장 원칙)
+        // 모든 지층/변형은 보이는 화면보다 훨씬 넓게 그려서
+        // 회전/기울기 적용 시 잘림 현상을 방지함
+        // ========================================
+        const VIRTUAL_SCALE = 3;  // 가상 캔버스 배율
+        const VIRTUAL_WIDTH = WIDTH * VIRTUAL_SCALE;
+        const VIRTUAL_HEIGHT = HEIGHT * VIRTUAL_SCALE;
+        const OFFSET_X = WIDTH;   // 가시 영역의 시작 X (가상 캔버스 내)
+        const OFFSET_Y = HEIGHT;  // 가시 영역의 시작 Y (가상 캔버스 내)
+
+        let events = [];
+        let selectedIndex = -1;
+
+        let layerCount = 0;
+        let faultCount = 0;
+        let intrusionCount = 0;
+        let sillCount = 0;
+        let batholithCount = 0;
+        let erosionCount = 0;
+        let foldCount = 0;
+        let tiltCount = 0;
+
+        // 색상 인덱스 (순환)
+        let colorIndex = 0;
+
+        // ========================================
+        // 뚜렷한 지층 색상 (채도 높음, 구분 명확)
+        // ========================================
+        const VIVID_COLORS = [
+            '#E63946',  // 빨강
+            '#2A9D8F',  // 청록
+            '#264653',  // 남색
+            '#8338EC',  // 보라
+            '#3A86FF',  // 파랑
+            '#06D6A0',  // 민트
+            '#EF476F',  // 분홍
+            '#073B4C',  // 진한 남색
+            '#118AB2',  // 청색
+            '#06AED5',  // 하늘색
+            '#9B5DE5',  // 연보라
+            '#F15BB5',  // 핫핑크
+        ];
+
+        function getNextColor() {
+            const color = VIVID_COLORS[colorIndex % VIVID_COLORS.length];
+            colorIndex++;
+            return color;
+        }
+
+        // ========================================
+        // 유틸리티 함수
+        // ========================================
+
+        function generateErosionSurface(baseY, erosion) {
+            // 무한 확장 원칙: 가상 캔버스 전체 너비로 생성
+            const points = [];
+            const segments = 120;
+            const waveAmplitude = erosion.waveAmplitude || 12;
+            const waveFrequency = erosion.waveFrequency || 80;
+            const phase = erosion.seed || 0;
+
+            for (let i = 0; i <= segments; i++) {
+                const x = (i / segments) * VIRTUAL_WIDTH;
+                const wave = Math.sin((x / waveFrequency) * Math.PI * 2 + phase) * waveAmplitude;
+                points.push({ x, y: baseY + wave });
+            }
+            return points;
+        }
+
+        function getErosionYAtX(erosionPoints, x) {
+            if (!erosionPoints || erosionPoints.length === 0) return HEIGHT;
+
+            for (let i = 0; i < erosionPoints.length - 1; i++) {
+                if (x >= erosionPoints[i].x && x <= erosionPoints[i + 1].x) {
+                    const t = (x - erosionPoints[i].x) / (erosionPoints[i + 1].x - erosionPoints[i].x);
+                    return erosionPoints[i].y + t * (erosionPoints[i + 1].y - erosionPoints[i].y);
+                }
+            }
+            return erosionPoints[erosionPoints.length - 1].y;
+        }
+
+        // ========================================
+        // 이벤트 추가 함수들
+        // ========================================
+
+        function addLayer() {
+            layerCount++;
+            const newLayer = {
+                type: 'layer',
+                name: `지층 ${layerCount}`,
+                color: getNextColor(),
+                height: LAYER_HEIGHT
+            };
+            events.push(newLayer);
+            selectedIndex = events.length - 1;
+            updateTimeline();
+            showEditor('layer');
+            loadLayerToEditor(newLayer);
+            render();
+        }
+
+        function addErosion() {
+            const hasLayer = events.some(e => e.type === 'layer');
+            if (!hasLayer) {
+                alert('침식할 지층이 없습니다!');
+                return;
+            }
+            erosionCount++;
+            const newErosion = {
+                type: 'erosion',
+                name: `침식 ${erosionCount}`,
+                amount: 30,
+                waveAmplitude: 12,
+                waveFrequency: 80,
+                seed: Math.random() * Math.PI * 2
+            };
+            events.push(newErosion);
+            selectedIndex = events.length - 1;
+            updateTimeline();
+            showEditor('erosion');
+            loadErosionToEditor(newErosion);
+            render();
+        }
+
+        function addFault() {
+            faultCount++;
+            const newFault = {
+                type: 'fault',
+                name: `단층 ${faultCount}`,
+                position: 50,
+                angle: 70,  // 기본값: 왼쪽이 상반
+                hangingWallOffset: 0,  // 상반 이동
+                footwallOffset: 0       // 하반 이동
+            };
+            events.push(newFault);
+            selectedIndex = events.length - 1;
+            updateTimeline();
+            showEditor('fault');
+            loadFaultToEditor(newFault);
+            render();
+        }
+
+        function addIntrusion() {
+            intrusionCount++;
+            const newIntrusion = {
+                type: 'intrusion',
+                name: `암맥 ${intrusionCount}`,
+                position: 50,
+                angle: 90,
+                width: 25,
+                metaThickness: 12
+            };
+            events.push(newIntrusion);
+            selectedIndex = events.length - 1;
+            updateTimeline();
+            showEditor('intrusion');
+            loadIntrusionToEditor(newIntrusion);
+            render();
+        }
+
+        function addSill() {
+            sillCount++;
+            const newSill = {
+                type: 'sill',
+                name: `병반 ${sillCount}`,
+                position: 50,
+                depth: 50,  // 50% = 맨 밑바닥
+                angle: 0,   // 기울기 (-30 ~ +30도)
+                width: 150,
+                height: 40,
+                metaThickness: 10
+            };
+            events.push(newSill);
+            selectedIndex = events.length - 1;
+            updateTimeline();
+            showEditor('sill');
+            loadSillToEditor(newSill);
+            render();
+        }
+
+        function addBatholith() {
+            batholithCount++;
+            const newBatholith = {
+                type: 'batholith',
+                name: `저반 ${batholithCount}`,
+                position: 50,
+                stemWidth: 40,      // 줄기 너비
+                headWidth: 200,     // 머리(퍼진 부분) 너비
+                headHeight: 60,     // 머리 높이
+                headPosY: 240,      // 머리 Y축 위치 (화면 중간)
+                metaThickness: 15,
+                stemAngle: 0        // 줄기 기울기 (-45 ~ +45도)
+            };
+            events.push(newBatholith);
+            selectedIndex = events.length - 1;
+            updateTimeline();
+            showEditor('batholith');
+            loadBatholithToEditor(newBatholith);
+            render();
+        }
+
+        function addFold() {
+            foldCount++;
+            const newFold = {
+                type: 'fold',
+                name: `습곡 ${foldCount}`,
+                position: 50,
+                amplitude: 40,
+                wavelength: 200
+            };
+            events.push(newFold);
+            selectedIndex = events.length - 1;
+            updateTimeline();
+            showEditor('fold');
+            loadFoldToEditor(newFold);
+            render();
+        }
+
+        function addTilt() {
+            tiltCount++;
+            const newTilt = {
+                type: 'tilt',
+                name: `경사 ${tiltCount}`,
+                angle: 0  // 음수: 왼쪽 기울기, 양수: 오른쪽 기울기
+            };
+            events.push(newTilt);
+            selectedIndex = events.length - 1;
+            updateTimeline();
+            showEditor('tilt');
+            loadTiltToEditor(newTilt);
+            render();
+        }
+
+        // ========================================
+        // 타임라인 UI
+        // ========================================
+
+        function updateTimeline() {
+            const timeline = document.getElementById('timeline');
+
+            if (events.length === 0) {
+                timeline.innerHTML = '<div class="empty-msg">이벤트가 없습니다.<br>위 버튼으로 지층, 습곡, 단층, 관입을 추가하세요.</div>';
+                hideEditors();
+                return;
+            }
+
+            const iconMap = {
+                layer: '🪨', fault: '📐', intrusion: '🔥', sill: '🥞', batholith: '🍄', erosion: '🌊', fold: '🌀', tilt: '↗️'
+            };
+
+            let html = '';
+            events.forEach((event, index) => {
+                const isSelected = index === selectedIndex;
+                html += `
+                    <div class="timeline-item ${event.type} ${isSelected ? 'selected' : ''}"
+                         onclick="selectEvent(${index})">
+                        <div class="order">${index + 1}</div>
+                        <span class="name">${iconMap[event.type]} ${event.name}</span>
+                        ${event.color ? `<div class="color-preview" style="background:${event.color}"></div>` : ''}
+                    </div>
+                `;
+            });
+
+            timeline.innerHTML = html;
+        }
+
+        function selectEvent(index) {
+            selectedIndex = index;
+            updateTimeline();
+
+            const event = events[index];
+            if (event.type === 'layer') {
+                showEditor('layer');
+                loadLayerToEditor(event);
+            } else if (event.type === 'fault') {
+                showEditor('fault');
+                loadFaultToEditor(event);
+            } else if (event.type === 'intrusion') {
+                showEditor('intrusion');
+                loadIntrusionToEditor(event);
+            } else if (event.type === 'sill') {
+                showEditor('sill');
+                loadSillToEditor(event);
+            } else if (event.type === 'batholith') {
+                showEditor('batholith');
+                loadBatholithToEditor(event);
+            } else if (event.type === 'fold') {
+                showEditor('fold');
+                loadFoldToEditor(event);
+            } else if (event.type === 'tilt') {
+                showEditor('tilt');
+                loadTiltToEditor(event);
+            } else if (event.type === 'erosion') {
+                showEditor('erosion');
+                loadErosionToEditor(event);
+            } else {
+                hideEditors();
+            }
+
+            render();
+        }
+
+        function showEditor(type) {
+            document.getElementById('layerEditor').classList.remove('active');
+            document.getElementById('faultEditor').classList.remove('active');
+            document.getElementById('intrusionEditor').classList.remove('active');
+            document.getElementById('sillEditor').classList.remove('active');
+            document.getElementById('batholithEditor').classList.remove('active');
+            document.getElementById('foldEditor').classList.remove('active');
+            document.getElementById('tiltEditor').classList.remove('active');
+            document.getElementById('erosionEditor').classList.remove('active');
+
+            if (type === 'layer') document.getElementById('layerEditor').classList.add('active');
+            else if (type === 'fault') document.getElementById('faultEditor').classList.add('active');
+            else if (type === 'intrusion') document.getElementById('intrusionEditor').classList.add('active');
+            else if (type === 'sill') document.getElementById('sillEditor').classList.add('active');
+            else if (type === 'batholith') document.getElementById('batholithEditor').classList.add('active');
+            else if (type === 'fold') document.getElementById('foldEditor').classList.add('active');
+            else if (type === 'tilt') document.getElementById('tiltEditor').classList.add('active');
+            else if (type === 'erosion') document.getElementById('erosionEditor').classList.add('active');
+        }
+
+        function hideEditors() {
+            document.getElementById('layerEditor').classList.remove('active');
+            document.getElementById('faultEditor').classList.remove('active');
+            document.getElementById('intrusionEditor').classList.remove('active');
+            document.getElementById('sillEditor').classList.remove('active');
+            document.getElementById('batholithEditor').classList.remove('active');
+            document.getElementById('foldEditor').classList.remove('active');
+            document.getElementById('tiltEditor').classList.remove('active');
+            document.getElementById('erosionEditor').classList.remove('active');
+        }
+
+        // ========================================
+        // 에디터 동기화
+        // ========================================
+
+        function loadLayerToEditor(layer) {
+            document.getElementById('layerHeight').value = layer.height;
+            document.getElementById('layerHeightVal').textContent = layer.height;
+            document.getElementById('layerBadge').textContent = layer.name;
+            document.getElementById('layerColorPreview').style.background = layer.color;
+        }
+
+        function loadFaultToEditor(fault) {
+            document.getElementById('faultPos').value = fault.position;
+            document.getElementById('faultAngle').value = fault.angle;
+            document.getElementById('faultHanging').value = fault.hangingWallOffset || 0;
+            document.getElementById('faultFoot').value = fault.footwallOffset || 0;
+
+            document.getElementById('faultPosVal').textContent = fault.position;
+            document.getElementById('faultAngleVal').textContent = fault.angle;
+            document.getElementById('faultHangingVal').textContent = fault.hangingWallOffset || 0;
+            document.getElementById('faultFootVal').textContent = fault.footwallOffset || 0;
+            document.getElementById('faultBadge').textContent = fault.name;
+
+            updateFaultIndicator(fault.angle);
+        }
+
+        function updateFaultIndicator(angle) {
+            const directionEl = document.getElementById('faultDirection');
+            const hangingSideEl = document.getElementById('hangingWallSide');
+            const footwallSideEl = document.getElementById('footwallSide');
+
+            if (angle < 90) {
+                // 단층면이 오른쪽 위 → 왼쪽 아래로 기울어짐 (/)
+                directionEl.textContent = `${angle}° (/ 기울기)`;
+                hangingSideEl.textContent = '왼쪽';
+                footwallSideEl.textContent = '오른쪽';
+            } else if (angle > 90) {
+                // 단층면이 왼쪽 위 → 오른쪽 아래로 기울어짐 (\)
+                directionEl.textContent = `${angle}° (\\ 기울기)`;
+                hangingSideEl.textContent = '오른쪽';
+                footwallSideEl.textContent = '왼쪽';
+            } else {
+                directionEl.textContent = '90° (수직)';
+                hangingSideEl.textContent = '-';
+                footwallSideEl.textContent = '-';
+            }
+        }
+
+        function loadIntrusionToEditor(intrusion) {
+            document.getElementById('intrusionPos').value = intrusion.position;
+            document.getElementById('intrusionAngle').value = intrusion.angle;
+            document.getElementById('intrusionWidth').value = intrusion.width;
+            document.getElementById('intrusionMeta').value = intrusion.metaThickness;
+            document.getElementById('intrusionPosVal').textContent = intrusion.position;
+            document.getElementById('intrusionAngleVal').textContent = intrusion.angle;
+            document.getElementById('intrusionWidthVal').textContent = intrusion.width;
+            document.getElementById('intrusionMetaVal').textContent = intrusion.metaThickness;
+            document.getElementById('intrusionBadge').textContent = intrusion.name;
+        }
+
+        function loadSillToEditor(sill) {
+            document.getElementById('sillPos').value = sill.position;
+            document.getElementById('sillAngle').value = sill.angle || 0;
+            document.getElementById('sillWidth').value = sill.width;
+            document.getElementById('sillHeight').value = sill.height;
+            document.getElementById('sillMeta').value = sill.metaThickness;
+            document.getElementById('sillPosVal').textContent = sill.position;
+            document.getElementById('sillAngleVal').textContent = sill.angle || 0;
+            document.getElementById('sillWidthVal').textContent = sill.width;
+            document.getElementById('sillHeightVal').textContent = sill.height;
+            document.getElementById('sillMetaVal').textContent = sill.metaThickness;
+            document.getElementById('sillBadge').textContent = sill.name;
+        }
+
+        function loadBatholithToEditor(batholith) {
+            document.getElementById('batholithPos').value = batholith.position;
+            document.getElementById('batholithStemWidth').value = batholith.stemWidth;
+            document.getElementById('batholithHeadWidth').value = batholith.headWidth;
+            document.getElementById('batholithHeadHeight').value = batholith.headHeight;
+            document.getElementById('batholithHeadPosY').value = batholith.headPosY || 100;
+            document.getElementById('batholithMeta').value = batholith.metaThickness;
+            document.getElementById('batholithStemAngle').value = batholith.stemAngle || 0;
+            document.getElementById('batholithPosVal').textContent = batholith.position;
+            document.getElementById('batholithStemWidthVal').textContent = batholith.stemWidth;
+            document.getElementById('batholithHeadWidthVal').textContent = batholith.headWidth;
+            document.getElementById('batholithHeadHeightVal').textContent = batholith.headHeight;
+            document.getElementById('batholithHeadPosYVal').textContent = batholith.headPosY || 100;
+            document.getElementById('batholithMetaVal').textContent = batholith.metaThickness;
+            document.getElementById('batholithStemAngleVal').textContent = batholith.stemAngle || 0;
+            document.getElementById('batholithBadge').textContent = batholith.name;
+        }
+
+        function loadFoldToEditor(fold) {
+            document.getElementById('foldPos').value = fold.position;
+            document.getElementById('foldAmplitude').value = fold.amplitude;
+            document.getElementById('foldWavelength').value = fold.wavelength;
+            document.getElementById('foldPosVal').textContent = fold.position;
+            document.getElementById('foldAmplitudeVal').textContent = fold.amplitude;
+            document.getElementById('foldWavelengthVal').textContent = fold.wavelength;
+            document.getElementById('foldBadge').textContent = fold.name;
+        }
+
+        function loadTiltToEditor(tilt) {
+            document.getElementById('tiltAngle').value = tilt.angle;
+            document.getElementById('tiltAngleVal').textContent = tilt.angle;
+            document.getElementById('tiltBadge').textContent = tilt.name;
+        }
+
+        function loadErosionToEditor(erosion) {
+            document.getElementById('erosionAmount').value = erosion.amount;
+            document.getElementById('erosionWave').value = erosion.waveAmplitude;
+            document.getElementById('erosionFreq').value = erosion.waveFrequency;
+            document.getElementById('erosionAmountVal').textContent = erosion.amount;
+            document.getElementById('erosionWaveVal').textContent = erosion.waveAmplitude;
+            document.getElementById('erosionFreqVal').textContent = erosion.waveFrequency;
+            document.getElementById('erosionBadge').textContent = erosion.name;
+        }
+
+        function updateLayer() {
+            if (selectedIndex < 0 || events[selectedIndex]?.type !== 'layer') return;
+            const layer = events[selectedIndex];
+            layer.height = parseInt(document.getElementById('layerHeight').value);
+            document.getElementById('layerHeightVal').textContent = layer.height;
+            render();
+        }
+
+        function updateFault() {
+            if (selectedIndex < 0 || events[selectedIndex]?.type !== 'fault') return;
+            const fault = events[selectedIndex];
+            fault.position = parseInt(document.getElementById('faultPos').value);
+            fault.angle = parseInt(document.getElementById('faultAngle').value);
+            fault.hangingWallOffset = parseInt(document.getElementById('faultHanging').value);
+            fault.footwallOffset = parseInt(document.getElementById('faultFoot').value);
+
+            document.getElementById('faultPosVal').textContent = fault.position;
+            document.getElementById('faultAngleVal').textContent = fault.angle;
+            document.getElementById('faultHangingVal').textContent = fault.hangingWallOffset;
+            document.getElementById('faultFootVal').textContent = fault.footwallOffset;
+
+            updateFaultIndicator(fault.angle);
+            render();
+        }
+
+        function updateIntrusion() {
+            if (selectedIndex < 0 || events[selectedIndex]?.type !== 'intrusion') return;
+            const intrusion = events[selectedIndex];
+            intrusion.position = parseInt(document.getElementById('intrusionPos').value);
+            intrusion.angle = parseInt(document.getElementById('intrusionAngle').value);
+            intrusion.width = parseInt(document.getElementById('intrusionWidth').value);
+            intrusion.metaThickness = parseInt(document.getElementById('intrusionMeta').value);
+            document.getElementById('intrusionPosVal').textContent = intrusion.position;
+            document.getElementById('intrusionAngleVal').textContent = intrusion.angle;
+            document.getElementById('intrusionWidthVal').textContent = intrusion.width;
+            document.getElementById('intrusionMetaVal').textContent = intrusion.metaThickness;
+            render();
+        }
+
+        function updateSill() {
+            if (selectedIndex < 0 || events[selectedIndex]?.type !== 'sill') return;
+            const sill = events[selectedIndex];
+            sill.position = parseInt(document.getElementById('sillPos').value);
+            sill.angle = parseInt(document.getElementById('sillAngle').value);
+            sill.width = parseInt(document.getElementById('sillWidth').value);
+            sill.height = parseInt(document.getElementById('sillHeight').value);
+            sill.metaThickness = parseInt(document.getElementById('sillMeta').value);
+            document.getElementById('sillPosVal').textContent = sill.position;
+            document.getElementById('sillAngleVal').textContent = sill.angle;
+            document.getElementById('sillWidthVal').textContent = sill.width;
+            document.getElementById('sillHeightVal').textContent = sill.height;
+            document.getElementById('sillMetaVal').textContent = sill.metaThickness;
+            render();
+        }
+
+        function updateBatholith() {
+            if (selectedIndex < 0 || events[selectedIndex]?.type !== 'batholith') return;
+            const batholith = events[selectedIndex];
+            batholith.position = parseInt(document.getElementById('batholithPos').value);
+            batholith.stemWidth = parseInt(document.getElementById('batholithStemWidth').value);
+            batholith.headWidth = parseInt(document.getElementById('batholithHeadWidth').value);
+            batholith.headHeight = parseInt(document.getElementById('batholithHeadHeight').value);
+            batholith.headPosY = parseInt(document.getElementById('batholithHeadPosY').value);
+            batholith.metaThickness = parseInt(document.getElementById('batholithMeta').value);
+            batholith.stemAngle = parseInt(document.getElementById('batholithStemAngle').value);
+            document.getElementById('batholithPosVal').textContent = batholith.position;
+            document.getElementById('batholithStemWidthVal').textContent = batholith.stemWidth;
+            document.getElementById('batholithHeadWidthVal').textContent = batholith.headWidth;
+            document.getElementById('batholithHeadHeightVal').textContent = batholith.headHeight;
+            document.getElementById('batholithHeadPosYVal').textContent = batholith.headPosY;
+            document.getElementById('batholithMetaVal').textContent = batholith.metaThickness;
+            document.getElementById('batholithStemAngleVal').textContent = batholith.stemAngle;
+            render();
+        }
+
+        function updateFold() {
+            if (selectedIndex < 0 || events[selectedIndex]?.type !== 'fold') return;
+            const fold = events[selectedIndex];
+            fold.position = parseInt(document.getElementById('foldPos').value);
+            fold.amplitude = parseInt(document.getElementById('foldAmplitude').value);
+            fold.wavelength = parseInt(document.getElementById('foldWavelength').value);
+            document.getElementById('foldPosVal').textContent = fold.position;
+            document.getElementById('foldAmplitudeVal').textContent = fold.amplitude;
+            document.getElementById('foldWavelengthVal').textContent = fold.wavelength;
+            render();
+        }
+
+        function updateTilt() {
+            if (selectedIndex < 0 || events[selectedIndex]?.type !== 'tilt') return;
+            const tilt = events[selectedIndex];
+            tilt.angle = parseInt(document.getElementById('tiltAngle').value);
+            document.getElementById('tiltAngleVal').textContent = tilt.angle;
+            render();
+        }
+
+        function updateErosion() {
+            if (selectedIndex < 0 || events[selectedIndex]?.type !== 'erosion') return;
+            const erosion = events[selectedIndex];
+            erosion.amount = parseInt(document.getElementById('erosionAmount').value);
+            erosion.waveAmplitude = parseInt(document.getElementById('erosionWave').value);
+            erosion.waveFrequency = parseInt(document.getElementById('erosionFreq').value);
+            document.getElementById('erosionAmountVal').textContent = erosion.amount;
+            document.getElementById('erosionWaveVal').textContent = erosion.waveAmplitude;
+            document.getElementById('erosionFreqVal').textContent = erosion.waveFrequency;
+            render();
+        }
+
+        function deleteSelected() {
+            if (selectedIndex < 0) return;
+            events.splice(selectedIndex, 1);
+            selectedIndex = -1;
+            hideEditors();
+            updateTimeline();
+            render();
+        }
+
+        function resetAll() {
+            events = [];
+            selectedIndex = -1;
+            layerCount = faultCount = intrusionCount = sillCount = batholithCount = erosionCount = foldCount = tiltCount = 0;
+            colorIndex = 0;
+            hideEditors();
+            updateTimeline();
+            render();
+        }
+
+        // ========================================
+        // 핵심 렌더링 시스템
+        // ========================================
+
+        function render() {
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+            drawBackground(ctx, WIDTH, HEIGHT);
+
+            if (events.length === 0) {
+                drawEmptyMessage();
+                return;
+            }
+
+            // 가상 캔버스 생성 (보이는 화면의 3배 크기)
+            let workCanvas = document.createElement('canvas');
+            workCanvas.width = VIRTUAL_WIDTH;
+            workCanvas.height = VIRTUAL_HEIGHT;
+            let workCtx = workCanvas.getContext('2d');
+
+            // 가상 캔버스에 배경 그리기
+            drawBackground(workCtx, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
+
+            // 무한 확장 원칙: 아래쪽 영역도 첫 번째 지층 색상으로 채우기
+            // (기울기 적용 시 아래쪽 빈 공간 방지)
+            const firstLayer = events.find(e => e.type === 'layer');
+            if (firstLayer) {
+                workCtx.fillStyle = firstLayer.color;
+                workCtx.fillRect(0, OFFSET_Y + HEIGHT, VIRTUAL_WIDTH, VIRTUAL_HEIGHT - (OFFSET_Y + HEIGHT));
+            }
+
+            // surfaceY는 가상 캔버스 기준 (가시 영역 하단 = OFFSET_Y + HEIGHT)
+            let surfaceY = OFFSET_Y + HEIGHT;
+            let foldFunctions = [];
+            let activeErosionPoints = null;
+
+            // ============================================
+            // 핵심 원칙: 모든 것을 순서대로 캔버스에 그린다
+            // 나중 이벤트는 이전 것을 "굳어진 사진처럼" 덮어쓴다
+            // ============================================
+
+            for (let i = 0; i < events.length; i++) {
+                const event = events[i];
+
+                if (event.type === 'layer') {
+                    if (activeErosionPoints) {
+                        drawLayerAboveErosion(workCtx, surfaceY, event, activeErosionPoints);
+                        activeErosionPoints = null;
+                    } else {
+                        drawLayerWithFolds(workCtx, surfaceY, event);
+                    }
+                    surfaceY -= event.height;
+
+                } else if (event.type === 'fold') {
+                    workCanvas = applyFoldToCanvas(workCanvas, event);
+                    workCtx = workCanvas.getContext('2d');
+                    foldFunctions.push(event);
+
+                    if (activeErosionPoints) {
+                        activeErosionPoints = activeErosionPoints.map(p => ({
+                            x: p.x,
+                            y: p.y + getFoldDisplacement(p.x, event)
+                        }));
+                    }
+
+                } else if (event.type === 'tilt') {
+                    // 대규모 경사: 캔버스 전체를 기울임
+                    workCanvas = applyTiltToCanvas(workCanvas, event);
+                    workCtx = workCanvas.getContext('2d');
+
+                } else if (event.type === 'erosion') {
+                    const erosionY = surfaceY + event.amount;
+                    const erosionPoints = generateErosionSurface(erosionY, event);
+
+                    // 1. 캔버스 클리핑 (침식)
+                    workCanvas = applyErosionToCanvas(workCanvas, erosionPoints);
+                    workCtx = workCanvas.getContext('2d');
+
+                    // 2. 부정합 선을 캔버스에 즉시 그림 (이후 이벤트가 이 위에 덮어씀)
+                    drawUnconformityLine(workCtx, erosionPoints);
+
+                    const minY = Math.min(...erosionPoints.map(p => p.y));
+                    activeErosionPoints = erosionPoints;
+                    surfaceY = minY;
+
+                } else if (event.type === 'fault') {
+                    // 단층: 캔버스 전체를 변형 (부정합 선 포함)
+                    workCanvas = applyFaultToCanvas(workCanvas, event, i === selectedIndex);
+                    workCtx = workCanvas.getContext('2d');
+
+                    if (activeErosionPoints) {
+                        activeErosionPoints = applyFaultToErosionPoints(activeErosionPoints, event);
+                    }
+
+                } else if (event.type === 'intrusion') {
+                    // 암맥 관입: 캔버스 위에 그림
+                    drawIntrusionToContext(workCtx, event, i === selectedIndex);
+
+                } else if (event.type === 'sill') {
+                    // 병반 관입: 반타원형으로 그림
+                    drawSillToContext(workCtx, event, i === selectedIndex);
+
+                } else if (event.type === 'batholith') {
+                    // 저반 관입: 버섯형으로 그림
+                    drawBatholithToContext(workCtx, event, i === selectedIndex);
+                }
+            }
+
+            // 최종 결과 출력: 가상 캔버스의 가시 영역만 추출
+            // drawImage(source, sx, sy, sw, sh, dx, dy, dw, dh)
+            ctx.drawImage(workCanvas, OFFSET_X, OFFSET_Y, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT);
+        }
+
+        function drawBackground(context, w = WIDTH, h = HEIGHT) {
+            const bgGradient = context.createLinearGradient(0, 0, 0, h);
+            bgGradient.addColorStop(0, '#87CEEB');
+            bgGradient.addColorStop(0.15, '#B0C4DE');
+            bgGradient.addColorStop(1, '#8B7355');
+            context.fillStyle = bgGradient;
+            context.fillRect(0, 0, w, h);
+        }
+
+        function drawEmptyMessage() {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.font = '18px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🪨 [지층 추가] 버튼을 눌러 시작하세요!', WIDTH/2, HEIGHT/2);
+            ctx.textAlign = 'left';
+        }
+
+        // ========================================
+        // 지층 그리기
+        // ========================================
+
+        function drawLayerWithFolds(context, baseY, layer) {
+            // 지층은 항상 평평하게 그림 (습곡은 캔버스 변형으로만 적용)
+            // 무한 확장 원칙: 가상 캔버스 전체 너비로 그림 (회전 시 잘림 방지)
+            context.fillStyle = layer.color;
+            context.beginPath();
+
+            // 가상 캔버스 전체 너비로 평평한 사각형 그리기
+            context.moveTo(0, baseY);
+            context.lineTo(VIRTUAL_WIDTH, baseY);
+            context.lineTo(VIRTUAL_WIDTH, baseY - layer.height);
+            context.lineTo(0, baseY - layer.height);
+
+            context.closePath();
+            context.fill();
+
+            // 경계선 (더 진하게)
+            context.strokeStyle = 'rgba(0,0,0,0.4)';
+            context.lineWidth = 1.5;
+            context.beginPath();
+            context.moveTo(0, baseY - layer.height);
+            context.lineTo(VIRTUAL_WIDTH, baseY - layer.height);
+            context.stroke();
+        }
+
+        function drawLayerAboveErosion(context, baseY, layer, erosionPoints) {
+            // 무한 확장 원칙: 가상 캔버스 전체 너비로 그림
+            const segments = 150;
+            const segmentWidth = VIRTUAL_WIDTH / segments;
+
+            context.fillStyle = layer.color;
+            context.beginPath();
+
+            // 지층의 바닥면: 부정합 파형을 따라감 (가상 캔버스 전체)
+            context.moveTo(0, getErosionYAtX(erosionPoints, 0));
+            for (let i = 1; i <= segments; i++) {
+                const x = i * segmentWidth;
+                const erosionY = getErosionYAtX(erosionPoints, x);
+                context.lineTo(x, erosionY);
+            }
+
+            // 지층의 윗면: 항상 평평하게 (가상 캔버스 전체 너비)
+            const topY = baseY - layer.height;
+            context.lineTo(VIRTUAL_WIDTH, topY);
+            context.lineTo(0, topY);
+
+            context.closePath();
+            context.fill();
+
+            // 윗면 경계선 (평평한 선)
+            context.strokeStyle = 'rgba(0,0,0,0.4)';
+            context.lineWidth = 1.5;
+            context.beginPath();
+            context.moveTo(0, topY);
+            context.lineTo(VIRTUAL_WIDTH, topY);
+            context.stroke();
+        }
+
+        function getFoldDisplacement(x, fold) {
+            // 습곡 중심은 가시 영역 기준 → 가상 캔버스 좌표로 변환
+            const centerX = OFFSET_X + fold.position / 100 * WIDTH;
+            const distance = x - centerX;
+            const wavelength = fold.wavelength;
+            const amplitude = fold.amplitude;
+            const decay = Math.exp(-(distance * distance) / (wavelength * wavelength * 0.5));
+            return amplitude * Math.cos((distance / wavelength) * Math.PI * 2) * decay;
+        }
+
+        // ========================================
+        // 습곡 적용
+        // ========================================
+
+        function applyFoldToCanvas(sourceCanvas, fold) {
+            const sw = sourceCanvas.width;
+            const sh = sourceCanvas.height;
+
+            const resultCanvas = document.createElement('canvas');
+            resultCanvas.width = sw;
+            resultCanvas.height = sh;
+            const resultCtx = resultCanvas.getContext('2d');
+
+            const sourceCtx = sourceCanvas.getContext('2d');
+            const imageData = sourceCtx.getImageData(0, 0, sw, sh);
+            const resultImageData = resultCtx.createImageData(sw, sh);
+
+            for (let x = 0; x < sw; x++) {
+                const displacement = getFoldDisplacement(x, fold);
+                for (let y = 0; y < sh; y++) {
+                    const srcY = Math.round(y - displacement);
+                    if (srcY >= 0 && srcY < sh) {
+                        const srcIdx = (srcY * sw + x) * 4;
+                        const dstIdx = (y * sw + x) * 4;
+                        resultImageData.data[dstIdx] = imageData.data[srcIdx];
+                        resultImageData.data[dstIdx + 1] = imageData.data[srcIdx + 1];
+                        resultImageData.data[dstIdx + 2] = imageData.data[srcIdx + 2];
+                        resultImageData.data[dstIdx + 3] = imageData.data[srcIdx + 3];
+                    }
+                }
+            }
+
+            resultCtx.putImageData(resultImageData, 0, 0);
+
+            // 빈 영역(투명)에 배경 채우기
+            resultCtx.globalCompositeOperation = 'destination-over';
+            drawBackground(resultCtx, sw, sh);
+            resultCtx.globalCompositeOperation = 'source-over';
+
+            return resultCanvas;
+        }
+
+        // 대규모 경사(기울기) 적용 - 전체 캔버스를 기울임
+        function applyTiltToCanvas(sourceCanvas, tilt) {
+            const sw = sourceCanvas.width;
+            const sh = sourceCanvas.height;
+
+            const resultCanvas = document.createElement('canvas');
+            resultCanvas.width = sw;
+            resultCanvas.height = sh;
+            const resultCtx = resultCanvas.getContext('2d');
+
+            const angleRad = tilt.angle * Math.PI / 180;
+
+            // 회전 중심점: 가시 영역 하단 중앙 (가상 캔버스 좌표)
+            const pivotX = OFFSET_X + WIDTH / 2;
+            const pivotY = OFFSET_Y + HEIGHT;
+
+            resultCtx.save();
+            resultCtx.translate(pivotX, pivotY);
+            resultCtx.rotate(angleRad);
+            resultCtx.translate(-pivotX, -pivotY);
+            resultCtx.drawImage(sourceCanvas, 0, 0);
+            resultCtx.restore();
+
+            // 빈 영역(투명)에 배경 채우기
+            resultCtx.globalCompositeOperation = 'destination-over';
+            drawBackground(resultCtx, sw, sh);
+            resultCtx.globalCompositeOperation = 'source-over';
+
+            return resultCanvas;
+        }
+
+        // ========================================
+        // 침식 적용
+        // ========================================
+
+        function applyErosionToCanvas(sourceCanvas, erosionPoints) {
+            const sw = sourceCanvas.width;
+            const sh = sourceCanvas.height;
+
+            // 클리핑용 임시 캔버스
+            const clippedCanvas = document.createElement('canvas');
+            clippedCanvas.width = sw;
+            clippedCanvas.height = sh;
+            const clippedCtx = clippedCanvas.getContext('2d');
+
+            // 침식면 아래 영역만 클리핑 (가상 캔버스 전체)
+            clippedCtx.beginPath();
+            clippedCtx.moveTo(0, sh);
+            erosionPoints.forEach(point => {
+                clippedCtx.lineTo(point.x, point.y);
+            });
+            clippedCtx.lineTo(sw, sh);
+            clippedCtx.closePath();
+            clippedCtx.clip();
+            clippedCtx.drawImage(sourceCanvas, 0, 0);
+
+            // 클리핑 없는 깨끗한 캔버스에 복사 (이후 그리기 작업이 클리핑되지 않도록)
+            const resultCanvas = document.createElement('canvas');
+            resultCanvas.width = sw;
+            resultCanvas.height = sh;
+            const resultCtx = resultCanvas.getContext('2d');
+            resultCtx.drawImage(clippedCanvas, 0, 0);
+
+            // 빈 영역(투명)에 배경 채우기
+            resultCtx.globalCompositeOperation = 'destination-over';
+            drawBackground(resultCtx, sw, sh);
+            resultCtx.globalCompositeOperation = 'source-over';
+
+            return resultCanvas;
+        }
+
+        function applyFaultToErosionPoints(erosionPoints, fault) {
+            // 단층 위치는 가시 영역 기준 → 가상 캔버스 좌표로 변환
+            const faultX = OFFSET_X + fault.position / 100 * WIDTH;
+            const angle = fault.angle;
+            const hangingOffset = fault.hangingWallOffset || 0;
+            const footOffset = fault.footwallOffset || 0;
+
+            // 각도에 따라 상반/하반 결정
+            const isLeftHanging = angle < 90;
+
+            return erosionPoints.map(p => {
+                if (p.x < faultX) {
+                    const offset = isLeftHanging ? hangingOffset : footOffset;
+                    return { x: p.x, y: p.y - offset };
+                } else {
+                    const offset = isLeftHanging ? footOffset : hangingOffset;
+                    return { x: p.x, y: p.y - offset };
+                }
+            });
+        }
+
+        function drawUnconformityLine(context, points) {
+            context.save();
+            context.strokeStyle = '#FF6600';
+            context.lineWidth = 3;
+
+            // 부정합 선 그리기 (가상 캔버스 전체)
+            context.beginPath();
+            points.forEach((point, i) => {
+                if (i === 0) context.moveTo(point.x, point.y);
+                else context.lineTo(point.x, point.y);
+            });
+            context.stroke();
+
+            // 라벨 - 가시 영역 왼쪽에 표시
+            context.fillStyle = '#FF6600';
+            context.font = 'bold 12px sans-serif';
+            const labelY = getErosionYAtX(points, OFFSET_X);
+            context.fillText('〰 부정합', OFFSET_X + 10, labelY - 10);
+
+            context.restore();
+        }
+
+        // ========================================
+        // 단층 적용 (상반/하반 개별 이동)
+        // ========================================
+
+        /**
+         * 단층면 기준 상반/하반 결정:
+         * - 각도 < 90° (/ 기울기): 왼쪽이 상반, 오른쪽이 하반
+         * - 각도 > 90° (\ 기울기): 오른쪽이 상반, 왼쪽이 하반
+         * - 각도 = 90° (수직): 좌우 대칭, 상반/하반 구분 없음
+         */
+        function applyFaultToCanvas(sourceCanvas, fault, isSelected) {
+            const sw = sourceCanvas.width;
+            const sh = sourceCanvas.height;
+
+            const resultCanvas = document.createElement('canvas');
+            resultCanvas.width = sw;
+            resultCanvas.height = sh;
+            const resultCtx = resultCanvas.getContext('2d');
+
+            // 단층 위치는 가시 영역 기준 → 가상 캔버스 좌표로 변환
+            const faultX = OFFSET_X + fault.position / 100 * WIDTH;
+            const angleRad = (fault.angle - 90) * Math.PI / 180;
+            const hangingOffset = fault.hangingWallOffset || 0;
+            const footOffset = fault.footwallOffset || 0;
+
+            // 각도에 따라 어느 쪽이 상반인지 결정
+            const isLeftHanging = fault.angle < 90;
+
+            // 왼쪽 블록의 오프셋
+            const leftOffset = isLeftHanging ? -hangingOffset : -footOffset;
+            // 오른쪽 블록의 오프셋
+            const rightOffset = isLeftHanging ? -footOffset : -hangingOffset;
+
+            // 수직 단층(90도)인 경우 양쪽 모두 적용
+            const leftOffsetFinal = fault.angle === 90 ? -hangingOffset : leftOffset;
+            const rightOffsetFinal = fault.angle === 90 ? -footOffset : rightOffset;
+
+            const extend = sh * 2;
+            const dx = Math.sin(angleRad) * extend;
+            const dy = Math.cos(angleRad) * extend;
+
+            // 왼쪽 영역
+            resultCtx.save();
+            resultCtx.beginPath();
+            resultCtx.moveTo(0, 0);
+            resultCtx.lineTo(faultX - dx, -dy);
+            resultCtx.lineTo(faultX + dx, sh + dy);
+            resultCtx.lineTo(0, sh);
+            resultCtx.closePath();
+            resultCtx.clip();
+            resultCtx.drawImage(sourceCanvas, 0, leftOffsetFinal);
+            resultCtx.restore();
+
+            // 오른쪽 영역
+            resultCtx.save();
+            resultCtx.beginPath();
+            resultCtx.moveTo(faultX - dx, -dy);
+            resultCtx.lineTo(sw, 0);
+            resultCtx.lineTo(sw, sh);
+            resultCtx.lineTo(faultX + dx, sh + dy);
+            resultCtx.closePath();
+            resultCtx.clip();
+            resultCtx.drawImage(sourceCanvas, 0, rightOffsetFinal);
+            resultCtx.restore();
+
+            // 단층선
+            resultCtx.save();
+            resultCtx.strokeStyle = isSelected ? '#FF0000' : '#CC0000';
+            resultCtx.lineWidth = isSelected ? 4 : 2;
+            resultCtx.setLineDash([8, 4]);
+            resultCtx.beginPath();
+            resultCtx.moveTo(faultX - dx, -dy);
+            resultCtx.lineTo(faultX + dx, sh + dy);
+            resultCtx.stroke();
+            resultCtx.setLineDash([]);
+            resultCtx.restore();
+
+            // 상반/하반 라벨 표시 (선택된 경우) - 가시 영역 중앙에 표시
+            if (isSelected) {
+                resultCtx.save();
+                resultCtx.font = 'bold 12px sans-serif';
+                resultCtx.fillStyle = '#FFD700';
+                const labelY = OFFSET_Y + HEIGHT / 2;
+
+                if (fault.angle < 90) {
+                    resultCtx.fillText('상반', faultX - 50, labelY);
+                    resultCtx.fillText('하반', faultX + 20, labelY);
+                } else if (fault.angle > 90) {
+                    resultCtx.fillText('하반', faultX - 50, labelY);
+                    resultCtx.fillText('상반', faultX + 20, labelY);
+                }
+                resultCtx.restore();
+            }
+
+            // 빈 영역(투명)에 배경 채우기
+            resultCtx.globalCompositeOperation = 'destination-over';
+            drawBackground(resultCtx, sw, sh);
+            resultCtx.globalCompositeOperation = 'source-over';
+
+            return resultCanvas;
+        }
+
+        // ========================================
+        // 관입 그리기
+        // ========================================
+
+        function drawIntrusionToContext(context, intrusion, isSelected) {
+            // 관입 위치는 가시 영역 기준 → 가상 캔버스 좌표로 변환
+            const posX = OFFSET_X + intrusion.position / 100 * WIDTH;
+            const angleRad = (intrusion.angle - 90) * Math.PI / 180;
+            const intrusionWidth = intrusion.width;
+            const intrusionLength = VIRTUAL_HEIGHT * 1.2;  // 가상 캔버스 높이 기준
+            const metaThickness = intrusion.metaThickness || 0;
+
+            context.save();
+            context.translate(posX, OFFSET_Y + HEIGHT / 2);
+            context.rotate(angleRad);
+
+            if (metaThickness > 0) {
+                const totalWidth = intrusionWidth + metaThickness * 2;
+
+                const metaGradient = context.createLinearGradient(-totalWidth/2, 0, totalWidth/2, 0);
+                metaGradient.addColorStop(0, 'rgba(255, 200, 100, 0)');
+                metaGradient.addColorStop(0.15, 'rgba(255, 180, 50, 0.7)');
+                metaGradient.addColorStop(0.25, 'rgba(200, 150, 50, 0.9)');
+                metaGradient.addColorStop(0.35, 'rgba(150, 100, 50, 0.6)');
+                metaGradient.addColorStop(0.5, 'rgba(150, 100, 50, 0)');
+                metaGradient.addColorStop(0.65, 'rgba(150, 100, 50, 0.6)');
+                metaGradient.addColorStop(0.75, 'rgba(200, 150, 50, 0.9)');
+                metaGradient.addColorStop(0.85, 'rgba(255, 180, 50, 0.7)');
+                metaGradient.addColorStop(1, 'rgba(255, 200, 100, 0)');
+
+                context.fillStyle = metaGradient;
+                context.fillRect(-totalWidth/2, -intrusionLength/2, totalWidth, intrusionLength);
+            }
+
+            const gradient = context.createLinearGradient(-intrusionWidth/2, 0, intrusionWidth/2, 0);
+            gradient.addColorStop(0, '#5B0000');
+            gradient.addColorStop(0.2, '#7B0000');
+            gradient.addColorStop(0.5, '#9B2020');
+            gradient.addColorStop(0.8, '#7B0000');
+            gradient.addColorStop(1, '#5B0000');
+
+            context.fillStyle = gradient;
+            context.fillRect(-intrusionWidth/2, -intrusionLength/2, intrusionWidth, intrusionLength);
+
+            context.strokeStyle = isSelected ? '#FFD700' : '#3D0000';
+            context.lineWidth = isSelected ? 3 : 2;
+            context.strokeRect(-intrusionWidth/2, -intrusionLength/2, intrusionWidth, intrusionLength);
+
+            context.fillStyle = 'rgba(255,255,255,0.12)';
+            for (let i = 0; i < 30; i++) {
+                const x = (Math.random() - 0.5) * intrusionWidth * 0.8;
+                const y = (Math.random() - 0.5) * intrusionLength * 0.95;
+                const size = Math.random() * 2 + 1;
+                context.beginPath();
+                context.arc(x, y, size, 0, Math.PI * 2);
+                context.fill();
+            }
+
+            context.restore();
+        }
+
+        // 병반(반타원형) 관입 그리기
+        function drawSillToContext(context, sill, isSelected) {
+            // 병반 위치는 가시 영역 기준 → 가상 캔버스 좌표로 변환
+            const posX = OFFSET_X + sill.position / 100 * WIDTH;
+            const posY = OFFSET_Y + sill.depth / 50 * HEIGHT;  // 50% = 가시 영역 바닥
+            const sillWidth = sill.width;
+            const sillHeight = sill.height;
+            const metaThickness = sill.metaThickness || 0;
+            const angleRad = (sill.angle || 0) * Math.PI / 180;  // 각도를 라디안으로
+
+            // 무한 캔버스 원칙: 아래쪽 확장 높이 계산
+            const extensionHeight = VIRTUAL_HEIGHT - posY + 100;  // 여유있게 확장
+
+            context.save();
+
+            // 위치로 이동 후 회전
+            context.translate(posX, posY);
+            context.rotate(angleRad);
+
+            // 무한 캔버스 원칙: 아래쪽 확장 (기울기 적용 시 빈 공간 방지)
+            // 접촉 변성대 아래쪽 확장
+            if (metaThickness > 0) {
+                context.fillStyle = 'rgba(255, 180, 50, 0.4)';
+                context.fillRect(-sillWidth/2 - metaThickness, 0, sillWidth + metaThickness * 2, extensionHeight);
+            }
+
+            // 병반 본체 아래쪽 확장
+            context.fillStyle = '#5B0000';
+            context.fillRect(-sillWidth/2, 0, sillWidth, extensionHeight);
+
+            // 접촉 변성대 (반타원 주변) - 원점 기준으로 그리기
+            if (metaThickness > 0) {
+                const metaGradient = context.createRadialGradient(
+                    0, 0, 0,
+                    0, 0, Math.max(sillWidth/2, sillHeight) + metaThickness
+                );
+                metaGradient.addColorStop(0, 'rgba(255, 180, 50, 0)');
+                metaGradient.addColorStop(0.5, 'rgba(255, 180, 50, 0.5)');
+                metaGradient.addColorStop(0.7, 'rgba(200, 150, 50, 0.7)');
+                metaGradient.addColorStop(1, 'rgba(200, 150, 50, 0)');
+
+                context.fillStyle = metaGradient;
+                context.beginPath();
+                context.ellipse(0, 0, sillWidth/2 + metaThickness, sillHeight + metaThickness, 0, Math.PI, 0);
+                context.fill();
+            }
+
+            // 병반 본체 (반타원 - 위쪽 볼록) - 원점 기준
+            const gradient = context.createLinearGradient(0, -sillHeight, 0, 0);
+            gradient.addColorStop(0, '#9B2020');
+            gradient.addColorStop(0.3, '#7B0000');
+            gradient.addColorStop(0.7, '#5B0000');
+            gradient.addColorStop(1, '#4B0000');
+
+            context.fillStyle = gradient;
+            context.beginPath();
+            context.ellipse(0, 0, sillWidth/2, sillHeight, 0, Math.PI, 0);
+            context.fill();
+
+            // 테두리
+            context.strokeStyle = isSelected ? '#FFD700' : '#3D0000';
+            context.lineWidth = isSelected ? 3 : 2;
+            context.beginPath();
+            context.ellipse(0, 0, sillWidth/2, sillHeight, 0, Math.PI, 0);
+            context.stroke();
+
+            // 텍스처 (결정 패턴) - 원점 기준
+            context.fillStyle = 'rgba(255,255,255,0.1)';
+            for (let i = 0; i < 25; i++) {
+                const angle = Math.random() * Math.PI;
+                const r = Math.random();
+                const x = Math.cos(angle) * (sillWidth/2 * 0.85) * r;
+                const y = -Math.sin(angle) * (sillHeight * 0.85) * r;
+                const size = Math.random() * 2 + 1;
+                context.beginPath();
+                context.arc(x, y, size, 0, Math.PI * 2);
+                context.fill();
+            }
+
+            context.restore();
+        }
+
+        // 저반(버섯형) 관입 그리기
+        function drawBatholithToContext(context, batholith, isSelected) {
+            // 저반 위치는 가시 영역 기준 → 가상 캔버스 좌표로 변환
+            const posX = OFFSET_X + batholith.position / 100 * WIDTH;
+            const stemWidth = batholith.stemWidth;
+            const headWidth = batholith.headWidth;
+            const headHeight = batholith.headHeight;
+            // headPosY도 가시 영역 기준 → 가상 캔버스 좌표로 변환
+            const headPosY = OFFSET_Y + (batholith.headPosY || headHeight);
+            const metaThickness = batholith.metaThickness || 0;
+            const bottomY = VIRTUAL_HEIGHT;  // 무한 캔버스 원칙: 가상 캔버스 하단까지 확장
+            const stemAngle = batholith.stemAngle || 0;  // 줄기 기울기
+
+            // 줄기 기울기에 따른 바닥 X 오프셋 계산
+            const stemHeight = bottomY - headPosY;
+            const stemAngleRad = stemAngle * Math.PI / 180;
+            const bottomXOffset = Math.tan(stemAngleRad) * stemHeight;
+
+            context.save();
+
+            // 접촉 변성대 그리기 (줄기와 머리 분리 - 수평 연결선 제거)
+            if (metaThickness > 0) {
+                context.fillStyle = 'rgba(255, 180, 50, 0.4)';
+
+                // 1. 줄기 변성대 (기울기 반영 + 머리 body 뒤쪽까지 연장)
+                context.beginPath();
+                // 바닥 왼쪽
+                context.moveTo(posX - stemWidth/2 - metaThickness + bottomXOffset, bottomY);
+                // headPosY 왼쪽 (기울기 적용)
+                context.lineTo(posX - stemWidth/2 - metaThickness, headPosY);
+                // 머리 영역으로 수직 연장 (나중에 머리 body가 덮음)
+                context.lineTo(posX - stemWidth/2 - metaThickness, headPosY - headHeight);
+                // 오른쪽 상단
+                context.lineTo(posX + stemWidth/2 + metaThickness, headPosY - headHeight);
+                // headPosY 오른쪽 (기울기 적용)
+                context.lineTo(posX + stemWidth/2 + metaThickness, headPosY);
+                // 바닥 오른쪽
+                context.lineTo(posX + stemWidth/2 + metaThickness + bottomXOffset, bottomY);
+                context.closePath();
+                context.fill();
+
+                // 2. 머리 변성대 (반타원 - 겹치는 부분은 머리 body가 덮어서 안 보임)
+                context.beginPath();
+                context.ellipse(posX, headPosY, headWidth/2 + metaThickness, headHeight + metaThickness, 0, Math.PI, 0);
+                context.fill();
+            }
+
+            // 저반 본체 (줄기 + 머리를 하나의 연속된 경로로 그려서 경계 없앰)
+            const bodyGradient = context.createLinearGradient(posX, headPosY - headHeight, posX, bottomY);
+            bodyGradient.addColorStop(0, '#9B2020');
+            bodyGradient.addColorStop(0.15, '#7B0000');
+            bodyGradient.addColorStop(0.4, '#5B0000');
+            bodyGradient.addColorStop(1, '#4B0000');
+
+            context.fillStyle = bodyGradient;
+            context.beginPath();
+            // 줄기 왼쪽 하단에서 시작
+            context.moveTo(posX - stemWidth/2 + bottomXOffset, bottomY);
+            // 줄기 왼쪽 상단
+            context.lineTo(posX - stemWidth/2, headPosY);
+            // 머리 왼쪽 끝으로 (줄기와 머리 연결)
+            context.lineTo(posX - headWidth/2, headPosY);
+            // 머리 위쪽 반타원
+            context.ellipse(posX, headPosY, headWidth/2, headHeight, 0, Math.PI, 0);
+            // 머리 오른쪽 끝에서 줄기 오른쪽 상단으로
+            context.lineTo(posX + stemWidth/2, headPosY);
+            // 줄기 오른쪽 하단
+            context.lineTo(posX + stemWidth/2 + bottomXOffset, bottomY);
+            context.closePath();
+            context.fill();
+
+            // 테두리 (전체 외곽선)
+            context.strokeStyle = isSelected ? '#FFD700' : '#3D0000';
+            context.lineWidth = isSelected ? 3 : 2;
+            context.beginPath();
+            // 줄기 왼쪽
+            context.moveTo(posX - stemWidth/2 + bottomXOffset, bottomY);
+            context.lineTo(posX - stemWidth/2, headPosY);
+            // 머리 왼쪽 하단으로
+            context.lineTo(posX - headWidth/2, headPosY);
+            // 머리 위쪽 반타원
+            context.ellipse(posX, headPosY, headWidth/2, headHeight, 0, Math.PI, 0);
+            // 머리 오른쪽에서 줄기 오른쪽으로
+            context.lineTo(posX + stemWidth/2, headPosY);
+            // 줄기 오른쪽 하단
+            context.lineTo(posX + stemWidth/2 + bottomXOffset, bottomY);
+            context.stroke();
+
+            // 텍스처 (결정 패턴)
+            context.fillStyle = 'rgba(255,255,255,0.1)';
+            // 줄기 텍스처 (기울기 반영)
+            for (let i = 0; i < 20; i++) {
+                const t = Math.random();  // 0~1: 머리에서 바닥까지의 비율
+                const xOffset = bottomXOffset * t;  // 기울기에 따른 X 오프셋
+                const x = posX + (Math.random() - 0.5) * stemWidth * 0.8 + xOffset;
+                const y = headPosY + t * (bottomY - headPosY) * 0.9;
+                const size = Math.random() * 2 + 1;
+                context.beginPath();
+                context.arc(x, y, size, 0, Math.PI * 2);
+                context.fill();
+            }
+            // 머리 텍스처
+            for (let i = 0; i < 30; i++) {
+                const angle = Math.random() * Math.PI;
+                const r = Math.random();
+                const x = posX + Math.cos(angle) * (headWidth/2 * 0.85) * r;
+                const y = headPosY - Math.sin(angle) * (headHeight * 0.85) * r;
+                const size = Math.random() * 2 + 1;
+                context.beginPath();
+                context.arc(x, y, size, 0, Math.PI * 2);
+                context.fill();
+            }
+
+            context.restore();
+        }
+
+        // ========================================
+        // 전체 화면 기능
+        // ========================================
+        function toggleFullscreen() {
+            const wrapper = document.getElementById('canvasWrapper');
+
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                if (wrapper.requestFullscreen) {
+                    wrapper.requestFullscreen();
+                } else if (wrapper.webkitRequestFullscreen) {
+                    wrapper.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+
+        // ESC 키로 전체 화면 종료 시 버튼 텍스트 업데이트
+        document.addEventListener('fullscreenchange', updateFullscreenButton);
+        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+
+        function updateFullscreenButton() {
+            const btn = document.querySelector('.fullscreen-btn');
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+                btn.textContent = '⛶ 전체 화면 종료';
+            } else {
+                btn.textContent = '⛶ 전체 화면';
+            }
+        }
+
+        // ========================================
+        // 초기화
+        // ========================================
+        render();
+        updateTimeline();
+    </script>
+</body>
+</html>
